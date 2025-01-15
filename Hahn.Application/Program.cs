@@ -3,8 +3,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Add services from Application & Infrastructure
-builder.Services.AddApplicationServices(); // Registers MediatR, AutoMapper
+builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // 2. Add Controllers

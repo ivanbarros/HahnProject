@@ -1,7 +1,4 @@
 ﻿using Hahn.Data.Context;
-using Hahn.Data.Interfaces.ExternalServices;
-using Hahn.Data.Interfaces.Repositories;
-using Hahn.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,19 +8,34 @@ namespace Hahn.Infra.Configuration;
 public static class InfrastructureServiceRegistration
 {
     public static IServiceCollection AddInfrastructureServices(
-        this IServiceCollection services,
-        IConfiguration configuration)
+            this IServiceCollection services,
+            IConfiguration configuration)
     {
         
         services.AddDbContext<HahnDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
        
-        services.AddScoped<IFoodRecipeRepository, FoodRecipeRepository>();
+        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => a.FullName is not null && a.FullName.StartsWith("Hahn."))
+            .ToArray();
 
-        // (Optional) External API Client
-        //services.AddHttpClient();
-        services.AddScoped<IExternalFoodApiClient, ExternalFoodApiClient>();
+        services.Scan(scan =>
+        {
+           
+            scan.FromAssemblies(allAssemblies)
+                .AddClasses(c => c.Where(t => t.Name.EndsWith("Repository")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime();
+
+            
+            scan.FromAssemblies(allAssemblies)
+                .AddClasses(c => c.Where(t => t.Name.EndsWith("ApiClient")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime();
+        });
+       
+        services.AddHttpClient();
 
         return services;
     }
