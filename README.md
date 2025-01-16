@@ -46,3 +46,6 @@ HahnProject.sln
             ├── components
             │   └── RecipesGrid.vue
             └── ...
+
+            ![image](https://github.com/user-attachments/assets/abccf4ec-ed04-4fdb-8ec2-9f723027c414)
+
