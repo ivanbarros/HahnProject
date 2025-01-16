@@ -7,9 +7,9 @@ namespace Hahn.Jobs;
 public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
 {
     private readonly IExternalFoodApiClient _externalClient;
-    private readonly IFoodRecipeRepository _recipeRepo;
+    private readonly IRecipeRepository _recipeRepo;
 
-    public FoodRecipeUpsertJob(IExternalFoodApiClient externalClient, IFoodRecipeRepository recipeRepo)
+    public FoodRecipeUpsertJob(IExternalFoodApiClient externalClient, IRecipeRepository recipeRepo)
     {
         _externalClient = externalClient;
         _recipeRepo = recipeRepo;

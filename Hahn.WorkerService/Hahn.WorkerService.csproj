@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Hahn.Application\Hahn.Application.csproj" />
     <ProjectReference Include="..\Hahn.Infra\Hahn.Infra.csproj" />
     <ProjectReference Include="..\Hahn.Jobs\Hahn.Jobs.csproj" />
   </ItemGroup>

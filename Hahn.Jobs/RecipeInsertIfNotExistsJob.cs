@@ -1,40 +1,54 @@
-﻿using Hahn.Data.Interfaces.Repositories;
+﻿using Hahn.Data.Dtos.Recipies;
+using Hahn.Data.Interfaces.Repositories;
 using Hahn.Domain.Entities;
+using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Hahn.Jobs;
-
-public class RecipeInsertIfNotExistsJob
+namespace Hahn.Jobs
 {
-    private readonly IFoodRecipeRepository _recipeRepository;
-    private readonly ILogger<RecipeInsertIfNotExistsJob> _logger;
-
-    public RecipeInsertIfNotExistsJob(
-        IFoodRecipeRepository recipeRepository,
-        ILogger<RecipeInsertIfNotExistsJob> logger)
+    /// <summary>
+    /// Hangfire job that inserts a recipe if it does not already exist.
+    /// </summary>
+    public class RecipeInsertIfNotExistsJob
     {
-        _recipeRepository = recipeRepository;
-        _logger = logger;
-    }
+        private readonly IRecipeRepository _recipeRepository;
+        private readonly ILogger<RecipeInsertIfNotExistsJob> _logger;
 
-    public async Task RunAsync(string title, string ingredients, string instructions)
-    {
-        _logger.LogInformation("Checking if recipe '{Title}' already exists...", title);
-
-       
-        var allRecipes = await _recipeRepository.GetAllAsync();
-        var existing = allRecipes.FirstOrDefault(r => r.Title == title);
-
-        if (existing != null)
+        public RecipeInsertIfNotExistsJob(IRecipeRepository recipeRepository, ILogger<RecipeInsertIfNotExistsJob> logger)
         {
-            _logger.LogInformation("Recipe '{Title}' already exists. Skipping insert.", title);
-            throw new Exception("Recipe '{Title}' already exists. Skipping insert.\", title");
+            _recipeRepository = recipeRepository;
+            _logger = logger;
         }
 
-        var newRecipe = new FoodRecipe(title, ingredients, instructions);
-        await _recipeRepository.AddAsync(newRecipe);
-        await _recipeRepository.SaveChangesAsync();
+        public async Task RunAsync(string title, string ingredients, string instructions, string jobId)
+        {
+            _logger.LogInformation("Attempting to upsert recipe: {Title}", title);
 
-        _logger.LogInformation("Recipe '{Title}' inserted successfully!", title);
+            // Check if recipe with the same title exists
+            var existingRecipes = await _recipeRepository.SearchByTitleAsync(title);
+            if (existingRecipes.Any())
+            {
+                _logger.LogInformation("Recipe '{Title}' already exists. Skipping insert.", title);
+                // Return the existing recipe
+                var existingRecipe = _recipeRepository.MapToDto(existingRecipes.First());
+                JobResultStore.SetJobResult(jobId, existingRecipe);
+                return;
+            }
+
+            // Insert new recipe
+            var newRecipe = new FoodRecipe(title, ingredients, instructions);
+            await _recipeRepository.AddAsync(newRecipe);
+            await _recipeRepository.SaveChangesAsync();
+
+            _logger.LogInformation("Recipe '{Title}' inserted successfully.", title);
+
+            // Map to DTO
+            var recipeDto = _recipeRepository.MapToDto(newRecipe);
+
+            // Return the new recipe
+            JobResultStore.SetJobResult(jobId, recipeDto);
+        }
     }
 }

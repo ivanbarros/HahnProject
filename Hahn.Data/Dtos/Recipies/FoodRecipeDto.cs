@@ -8,4 +8,5 @@ public class FoodRecipeDto : CommonEntity
     public string Cuisine { get; set; }
     public string Instructions { get; set; }
     public string Ingredients { get; set; }
+    public string JobId { get; set; }
 }

@@ -4,9 +4,9 @@ using Hahn.Domain.Entities.Enums;
 namespace Hahn.Domain.Entities;
 public class FoodRecipe : CommonEntity
 {
-    public string Title { get; private set; }
-    public string Instructions { get; private set; }
-    public string Ingredients { get; private set; }
+    public string Title { get; set; }
+    public string Instructions { get; set; }
+    public string Ingredients { get; set; }
 
     private FoodRecipe() { }
 

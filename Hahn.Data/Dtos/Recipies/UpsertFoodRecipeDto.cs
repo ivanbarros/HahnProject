@@ -1,6 +1,8 @@
-﻿namespace Hahn.Data.Dtos.Recipies;
+﻿using Hahn.Domain.Entities.BaseEntity;
 
-public class CreateFoodRecipeDto
+namespace Hahn.Data.Dtos.Recipies;
+
+public class UpsertFoodRecipeDto : CommonEntity
 {
     public string Title { get; set; }
     public string Instructions { get; set; }
