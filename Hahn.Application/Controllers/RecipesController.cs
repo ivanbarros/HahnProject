@@ -23,11 +23,12 @@ public class RecipesController : ControllerBase
         var query = new GetAllRecipesQuery();
         return await _mediator.Send(query);
     }
-
+    
     [HttpPost]
     public async Task<FoodRecipeDto> Create([FromBody] CreateFoodRecipeDto dto)
     {
         var command = new CreateFoodRecipeCommand(dto);
         return await _mediator.Send(command);
     }
+
 }

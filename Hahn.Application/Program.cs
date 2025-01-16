@@ -1,10 +1,16 @@
 using Hahn.Infra.Configuration;
+using Hangfire;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddHangfire(config =>
+{
+    config.UseSqlServerStorage(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 // 2. Add Controllers
 builder.Services.AddControllers();
@@ -17,6 +23,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+app.UseHangfireDashboard("/hangfire");
+
 
 // 4. Configure middleware
 if (app.Environment.IsDevelopment())

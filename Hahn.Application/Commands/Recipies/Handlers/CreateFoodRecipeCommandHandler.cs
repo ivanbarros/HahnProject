@@ -2,18 +2,18 @@
 using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
 using Hahn.Domain.Entities;
+using Hahn.Jobs;
+using Hangfire;
 using MediatR;
 
 namespace Hahn.Application.Commands.Recipies.Handlers;
 
 public class CreateFoodRecipeCommandHandler : IRequestHandler<CreateFoodRecipeCommand, FoodRecipeDto>
-{
-    private readonly IFoodRecipeRepository _recipeRepo;
+{   
     private readonly IMapper _mapper;
 
-    public CreateFoodRecipeCommandHandler(IFoodRecipeRepository recipeRepo, IMapper mapper)
+    public CreateFoodRecipeCommandHandler(IMapper mapper)
     {
-        _recipeRepo = recipeRepo;
         _mapper = mapper;
     }
 
@@ -25,8 +25,11 @@ public class CreateFoodRecipeCommandHandler : IRequestHandler<CreateFoodRecipeCo
             request.CreateDto.Ingredients
         );
 
-        await _recipeRepo.AddAsync(entity);
-        await _recipeRepo.SaveChangesAsync();
+        var worker = BackgroundJob.Enqueue<RecipeInsertIfNotExistsJob>(
+            job => job.RunAsync(
+                request.CreateDto.Title,
+                request.CreateDto.Ingredients,
+                request.CreateDto.Instructions));
 
         return _mapper.Map<FoodRecipeDto>(entity);
     }
