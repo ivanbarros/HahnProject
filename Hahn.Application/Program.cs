@@ -15,6 +15,17 @@ builder.Services.AddHangfire(config =>
 // 2. Add Controllers
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+
 // 3. Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -24,6 +35,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 app.UseHangfireDashboard("/hangfire");
+app.UseCors("AllowAll");
 
 
 // 4. Configure middleware
