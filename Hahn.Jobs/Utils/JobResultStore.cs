@@ -1,19 +1,14 @@
 ﻿// Utils/JobResultStore.cs
 using StackExchange.Redis;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace Hahn.Jobs.Utils;
 
-public class JobResultStore
+public static class JobResultStore
 {
-    private static ConnectionMultiplexer _redis;
-    private static IDatabase _db;
-
-    static JobResultStore()
-    {
-        _redis = ConnectionMultiplexer.Connect("localhost"); // Update with your Redis connection string
-        _db = _redis.GetDatabase();
-    }
+    // Key: JobId, Value: TaskCompletionSource<object>
+    private static ConcurrentDictionary<string, TaskCompletionSource<object>> _store = new ConcurrentDictionary<string, TaskCompletionSource<object>>();
 
     /// <summary>
     /// Registers a new job and returns its unique JobId.
@@ -21,8 +16,8 @@ public class JobResultStore
     public static string RegisterJob()
     {
         var jobId = Guid.NewGuid().ToString();
-        // Initialize the result key with a placeholder
-        _db.StringSet(jobId, "");
+        var tcs = new TaskCompletionSource<object>();
+        _store[jobId] = tcs;
         return jobId;
     }
 
@@ -31,19 +26,16 @@ public class JobResultStore
     /// </summary>
     public static async Task<T> GetJobResultAsync<T>(string jobId, int timeoutSeconds = 30)
     {
-        var timeout = TimeSpan.FromSeconds(timeoutSeconds);
-        var startTime = DateTime.UtcNow;
-
-        while (DateTime.UtcNow - startTime < timeout)
+        if (_store.TryGetValue(jobId, out var tcsObj))
         {
-            var result = await _db.StringGetAsync(jobId);
-            if (!result.IsNullOrEmpty)
+            var task = tcsObj.Task;
+            if (await Task.WhenAny(task, Task.Delay(timeoutSeconds * 1000)) == task)
             {
-                // Deserialize the result
-                return JsonSerializer.Deserialize<T>(result);
+                if (task.Result is T result)
+                {
+                    return result;
+                }
             }
-
-            await Task.Delay(500); // Poll every 500ms
         }
 
         return default(T);
@@ -54,7 +46,10 @@ public class JobResultStore
     /// </summary>
     public static void SetJobResult<T>(string jobId, T result)
     {
-        var serializedResult = JsonSerializer.Serialize(result);
-        _db.StringSet(jobId, serializedResult);
+        if (_store.TryGetValue(jobId, out var tcsObj))
+        {
+            tcsObj.SetResult(result);
+            _store.TryRemove(jobId, out _);
+        }
     }
 }

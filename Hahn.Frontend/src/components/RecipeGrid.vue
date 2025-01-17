@@ -31,8 +31,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="recipe in filteredRecipes"
-                :key="recipe.id">
+            <tr v-for="recipe in filteredRecipes" :key="recipe.id">
               <td>{{ recipe.title }}</td>
               <td>{{ recipe.ingredients }}</td>
               <td>{{ recipe.instructions }}</td>
@@ -41,16 +40,23 @@
         </table>
       </section>
 
-      <!-- Search By ID (GET /api/recipes/{id}) -->
+      <!-- Search By Recipe Selection (GET /api/recipes/{id}) -->
       <section class="search-id-section">
-        <h2>Find Recipe by ID</h2>
-        <input class="id-input"
-               v-model.number="singleId"
-               type="number"
-               placeholder="Enter recipe ID..." />
-        <button class="action-button" @click="fetchRecipeById">
-          Search
+        <h2>Find Recipe by Selection</h2>
+        <select class="recipe-select" v-model="selectedRecipeId">
+          <option disabled value="">-- Select a Recipe --</option>
+          <option v-for="recipe in recipes"
+                  :key="recipe.id"
+                  :value="recipe.id">
+            {{ recipe.title }}
+          </option>
+        </select>
+        <button class="action-button"
+                @click="fetchRecipeById"
+                :disabled="!selectedRecipeId || isLoading">
+          {{ isLoading ? 'Loading...' : 'Search' }}
         </button>
+
         <div v-if="singleRecipe" class="single-recipe-result">
           <h3>Recipe Found:</h3>
           <p><strong>Title:</strong> {{ singleRecipe.title }}</p>
@@ -67,15 +73,20 @@
         <h2>Create/Update Recipe</h2>
         <input class="upsert-input"
                v-model="upsertTitle"
+               type="text"
                placeholder="Recipe Title" />
         <input class="upsert-input"
                v-model="upsertIngredients"
+               type="text"
                placeholder="Ingredients" />
         <input class="upsert-input"
                v-model="upsertInstructions"
+               type="text"
                placeholder="Instructions" />
-        <button class="action-button" @click="upsertRecipe">
-          Upsert
+        <button class="action-button"
+                @click="upsertRecipe"
+                :disabled="!upsertTitle || !upsertIngredients || !upsertInstructions || isUpserting">
+          {{ isUpserting ? 'Upserting...' : 'Upsert' }}
         </button>
         <p class="hint">
           If ID is required for update, add it in the code <br />
@@ -91,14 +102,21 @@
 
       <!-- Delete Recipe (DELETE /api/recipes/delete/{id}) -->
       <section class="delete-section">
-        <h2>Delete Recipe by ID</h2>
-        <input class="id-input"
-               v-model.number="deleteId"
-               type="number"
-               placeholder="Enter recipe ID..." />
-        <button class="action-button delete-button" @click="deleteRecipe">
-          Delete
+        <h2>Delete Recipe by Selection</h2>
+        <select class="recipe-select" v-model="selectedDeleteRecipeId">
+          <option disabled value="">-- Select a Recipe to Delete --</option>
+          <option v-for="recipe in recipes"
+                  :key="recipe.id"
+                  :value="recipe.id">
+            {{ recipe.title }}
+          </option>
+        </select>
+        <button class="action-button delete-button"
+                @click="deleteRecipe"
+                :disabled="!selectedDeleteRecipeId || isDeleting">
+          {{ isDeleting ? 'Deleting...' : 'Delete' }}
         </button>
+
         <div v-if="deleteError" class="error-message">
           {{ deleteError }}
         </div>
@@ -112,10 +130,10 @@
 
 <script lang="ts">
   import { defineComponent, ref, onMounted, computed } from 'vue'
-  import axios from 'axios'
+  import api from '@/api' // Ensure this path is correct based on alias configuration
 
   interface RecipeDto {
-    id?: number
+    id?: string // Changed to string to accommodate GUID
     title: string
     ingredients: string
     instructions: string
@@ -129,10 +147,17 @@
       // Filter text
       const filterTerm = ref('')
 
-      // Single recipe search
-      const singleId = ref<number | null>(null)
+      // Selected recipe ID from dropdown for fetching
+      const selectedRecipeId = ref<string>('')
       const singleRecipe = ref<RecipeDto | null>(null)
       const singleRecipeError = ref<string | null>(null)
+      const isLoading = ref(false)
+
+      // Selected recipe ID from dropdown for deletion
+      const selectedDeleteRecipeId = ref<string>('')
+      const deleteError = ref<string | null>(null)
+      const deleteSuccess = ref<string | null>(null)
+      const isDeleting = ref(false)
 
       // Upsert (create/update) recipe fields
       const upsertTitle = ref('')
@@ -140,60 +165,89 @@
       const upsertInstructions = ref('')
       const upsertError = ref<string | null>(null)
       const upsertSuccess = ref<string | null>(null)
+      const isUpserting = ref(false)
 
-      // Delete recipe
-      const deleteId = ref<number | null>(null)
-      const deleteError = ref<string | null>(null)
-      const deleteSuccess = ref<string | null>(null)
+      // Utility function to validate GUIDs
+      const isValidGUID = (guid: string): boolean => {
+        const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        return guidRegex.test(guid)
+      }
 
       // 1. GET: Fetch all recipes
       const fetchRecipes = async () => {
         try {
-          const response = await axios.get<RecipeDto[]>('https://localhost:7105/api/recipes')
+          console.log('Fetching all recipes...')
+          const response = await api.get<RecipeDto[]>('/recipes')
           recipes.value = response.data
-        } catch (error) {
+          console.log('Fetched recipes:', recipes.value)
+        } catch (error: any) {
           console.error('Error fetching recipes:', error)
         }
       }
 
-      // 2. GET: Fetch recipe by ID
+      // 2. GET: Fetch recipe by selected ID
       const fetchRecipeById = async () => {
-        singleRecipeError.value = null
-        singleRecipe.value = null
-
-        if (singleId.value === null) {
-          singleRecipeError.value = 'Please enter a valid recipe ID.'
+        if (!selectedRecipeId.value) {
+          singleRecipeError.value = 'Please select a recipe.'
+          singleRecipe.value = null
           return
         }
 
+        console.log('Attempting to fetch recipe by ID...')
+        console.log('Selected Recipe ID:', selectedRecipeId.value)
+
+        singleRecipeError.value = null
+        singleRecipe.value = null
+        isLoading.value = true
+
         try {
-          const response = await axios.get<RecipeDto>(`https://localhost:7105/api/recipes/${singleId.value}`)
+          const response = await api.get<RecipeDto>(`/recipes/${selectedRecipeId.value}`)
           singleRecipe.value = response.data
+          console.log('Recipe fetched:', singleRecipe.value)
         } catch (error: any) {
           console.error('Error fetching recipe by ID:', error)
-          if (error.response && error.response.status === 404) {
-            singleRecipeError.value = `Recipe with ID ${singleId.value} not found.`
+          if (error.response) {
+            // Server responded with a status other than 2xx
+            singleRecipeError.value = `Error ${error.response.status}: ${error.response.data.message || 'An error occurred while fetching the recipe.'}`
+          } else if (error.request) {
+            // Request was made but no response received
+            singleRecipeError.value = 'No response from the server. Please try again later.'
           } else {
-            singleRecipeError.value = 'An error occurred while fetching the recipe.'
+            // Something happened in setting up the request
+            singleRecipeError.value = `Error: ${error.message}`
           }
+        } finally {
+          isLoading.value = false
         }
       }
 
       // 3. POST: Upsert recipe
-      //    Depending on your API, the same endpoint might handle both create & update.
       const upsertRecipe = async () => {
+        if (!upsertTitle.value || !upsertIngredients.value || !upsertInstructions.value) {
+          upsertError.value = 'Please fill in all fields.'
+          return
+        }
+
+        console.log('Attempting to upsert recipe...')
+        console.log('Upsert Data:', {
+          title: upsertTitle.value,
+          ingredients: upsertIngredients.value,
+          instructions: upsertInstructions.value
+        })
+
         upsertError.value = null
         upsertSuccess.value = null
+        isUpserting.value = true
 
         try {
           const dataToSend = {
             title: upsertTitle.value,
             ingredients: upsertIngredients.value,
             instructions: upsertInstructions.value
-            // If your API expects an ID for update, you can add an 'id' field here
+            // If your API expects an ID for update, include it here
             // id: ...
           }
-          const response = await axios.post<RecipeDto>('https://localhost:7105/api/recipes/upsert', dataToSend)
+          const response = await api.post<RecipeDto>('/recipes/upsert', dataToSend)
           // Refresh the main list after upsert
           await fetchRecipes()
           // Clear form
@@ -201,35 +255,50 @@
           upsertIngredients.value = ''
           upsertInstructions.value = ''
           upsertSuccess.value = 'Recipe upserted successfully!'
+          console.log('Upsert successful:', response.data)
         } catch (error: any) {
           console.error('Error upserting recipe:', error)
           upsertError.value = 'An error occurred while upserting the recipe.'
+        } finally {
+          isUpserting.value = false
         }
       }
 
-      // 4. DELETE: Delete recipe by ID
+      // 4. DELETE: Delete recipe by selected ID
       const deleteRecipe = async () => {
-        deleteError.value = null
-        deleteSuccess.value = null
-
-        if (deleteId.value === null) {
-          deleteError.value = 'Please enter a valid recipe ID.'
+        if (!selectedDeleteRecipeId.value) {
+          deleteError.value = 'Please select a recipe to delete.'
+          deleteSuccess.value = null
           return
         }
 
+        console.log('Attempting to delete recipe...')
+        console.log('Delete Recipe ID:', selectedDeleteRecipeId.value)
+
+        deleteError.value = null
+        deleteSuccess.value = null
+        isDeleting.value = true
+
         try {
-          await axios.delete(`https://localhost:7105/api/recipes/delete/${deleteId.value}`)
+          await api.delete(`/recipes/delete/${selectedDeleteRecipeId.value}`)
           // Refresh after deletion
           await fetchRecipes()
-          deleteId.value = null
+          selectedDeleteRecipeId.value = ''
           deleteSuccess.value = 'Recipe deleted successfully!'
+          console.log('Deletion successful for ID:', selectedDeleteRecipeId.value)
         } catch (error: any) {
           console.error('Error deleting recipe:', error)
           if (error.response && error.response.status === 404) {
-            deleteError.value = `Recipe with ID ${deleteId.value} not found.`
+            deleteError.value = `Recipe not found.`
+          } else if (error.response) {
+            deleteError.value = `Error ${error.response.status}: ${error.response.data.message || 'An error occurred while deleting the recipe.'}`
+          } else if (error.request) {
+            deleteError.value = 'No response from the server. Please try again later.'
           } else {
-            deleteError.value = 'An error occurred while deleting the recipe.'
+            deleteError.value = `Error: ${error.message}`
           }
+        } finally {
+          isDeleting.value = false
         }
       }
 
@@ -251,7 +320,7 @@
         filterTerm,
         filteredRecipes,
         fetchRecipes,
-        singleId,
+        selectedRecipeId,
         singleRecipe,
         singleRecipeError,
         fetchRecipeById,
@@ -261,15 +330,18 @@
         upsertRecipe,
         upsertError,
         upsertSuccess,
-        deleteId,
+        selectedDeleteRecipeId,
         deleteRecipe,
         deleteError,
-        deleteSuccess
+        deleteSuccess,
+        isLoading,
+        isDeleting,
+        isUpserting,
+        isValidGUID // Expose to template for disabling delete button if needed
       }
     }
   })
 </script>
-
 <style scoped>
   .page-container {
     font-family: Arial, sans-serif;
@@ -364,6 +436,20 @@
   .upsert-section,
   .delete-section {
     margin: 2rem 0;
+  }
+
+  .recipe-select {
+    width: 260px;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    appearance: none;
+    background-color: #fff;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="5" viewBox="0 0 10 5"><polygon points="0,0 10,0 5,5" fill="%23999"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 10px 5px;
   }
 
   .id-input,

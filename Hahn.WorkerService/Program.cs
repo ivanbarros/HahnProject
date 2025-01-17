@@ -25,7 +25,7 @@ var builder = Host.CreateDefaultBuilder(args)
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpsertFoodRecipeCommandHandler).Assembly));
 
-            
+            services.AddHangfireServer();
             services.AddHangfire(config =>
             {
                 config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)

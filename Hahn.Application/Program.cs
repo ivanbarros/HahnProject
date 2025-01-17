@@ -11,6 +11,7 @@ builder.Services.AddHangfire(config =>
     config.UseSqlServerStorage(
         builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddHangfireServer();
 
 // 2. Add Controllers
 builder.Services.AddControllers();

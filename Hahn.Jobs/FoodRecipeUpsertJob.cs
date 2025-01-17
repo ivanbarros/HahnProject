@@ -1,5 +1,6 @@
 ﻿using Hahn.Data.Interfaces.ExternalServices;
 using Hahn.Data.Interfaces.Repositories;
+using Hahn.Domain.Entities;
 using Hahn.Jobs.Interfaces;
 
 namespace Hahn.Jobs;
@@ -37,7 +38,7 @@ public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
             else
             {
                 // Insert new
-                var newRecipe = new Hahn.Domain.Entities.FoodRecipe(
+                var newRecipe = new FoodRecipe(
                     ext.Title, ext.Instructions, ext.Ingredients
                 );
                 await _recipeRepo.AddAsync(newRecipe);
