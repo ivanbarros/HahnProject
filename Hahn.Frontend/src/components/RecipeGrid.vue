@@ -68,6 +68,30 @@
         </div>
       </section>
 
+      <!-- Search for a Recipe Not in the Grid -->
+      <section class="search-not-in-grid-section">
+        <h2>Search for a Recipe</h2>
+        <input class="search-input"
+               v-model="searchTerm"
+               type="text"
+               placeholder="Enter recipe title..." />
+        <button class="action-button"
+                @click="searchRecipe"
+                :disabled="!searchTerm.trim() || isSearching">
+          {{ isSearching ? 'Searching...' : 'Search' }}
+        </button>
+
+        <div v-if="searchedRecipe" class="searched-recipe-result">
+          <h3>Search Result:</h3>
+          <p><strong>Title:</strong> {{ searchedRecipe.title }}</p>
+          <p><strong>Ingredients:</strong> {{ searchedRecipe.ingredients }}</p>
+          <p><strong>Instructions:</strong> {{ searchedRecipe.instructions }}</p>
+        </div>
+        <div v-if="searchError" class="error-message">
+          {{ searchError }}
+        </div>
+      </section>
+
       <!-- Upsert Recipe (POST /api/recipes/upsert) -->
       <section class="upsert-section">
         <h2>Create/Update Recipe</h2>
@@ -88,10 +112,7 @@
                 :disabled="!upsertTitle || !upsertIngredients || !upsertInstructions || isUpserting">
           {{ isUpserting ? 'Upserting...' : 'Upsert' }}
         </button>
-        <p class="hint">
-          If ID is required for update, add it in the code <br />
-          or modify your endpoint to handle an ID field in the request body.
-        </p>
+
         <div v-if="upsertError" class="error-message">
           {{ upsertError }}
         </div>
@@ -131,6 +152,8 @@
 <script lang="ts">
   import { defineComponent, ref, onMounted, computed } from 'vue'
   import api from '@/api' // Ensure this path is correct based on alias configuration
+  import debounce from 'lodash.debounce'
+
 
   interface RecipeDto {
     id?: string // Changed to string to accommodate GUID
@@ -166,6 +189,12 @@
       const upsertError = ref<string | null>(null)
       const upsertSuccess = ref<string | null>(null)
       const isUpserting = ref(false)
+
+      // Search for a recipe not in the grid
+      const searchTerm = ref('')
+      const searchedRecipe = ref<RecipeDto | null>(null)
+      const searchError = ref<string | null>(null)
+      const isSearching = ref(false)
 
       // Utility function to validate GUIDs
       const isValidGUID = (guid: string): boolean => {
@@ -302,6 +331,57 @@
         }
       }
 
+      // 5. SEARCH: Search for a recipe not in the grid
+      const searchRecipe = async () => {
+        if (!searchTerm.value.trim()) {
+          searchError.value = 'Please enter a recipe title to search.'
+          searchedRecipe.value = null
+          return
+        }
+        const debouncedSearch = debounce(async () => {
+          await searchRecipe()
+        }, 300) // 300ms delay
+
+        watch(searchTerm, () => {
+          if (searchTerm.value.trim()) {
+            debouncedSearch()
+          }
+        })
+
+        console.log('Attempting to search for recipe...')
+        console.log('Search Term:', searchTerm.value)
+
+        searchError.value = null
+        searchedRecipe.value = null
+        isSearching.value = true
+
+        try {
+          const response = await api.get<RecipeDto[]>('/recipes/search', {
+            params: { title: searchTerm.value.trim() }
+          })
+          if (response.data.length > 0) {
+            // Assuming the search returns an array of matching recipes
+            searchedRecipe.value = response.data[0] // Display the first match
+            console.log('Recipe found:', searchedRecipe.value)
+          } else {
+            searchError.value = 'No recipe found with the provided title.'
+            console.log('No recipe found for the search term.')
+          }
+        } catch (error: any) {
+          console.error('Error searching for recipe:', error)
+          if (error.response) {
+            searchError.value = error.response.data.message || 'An error occurred while searching for the recipe.'
+          } else if (error.request) {
+            searchError.value = 'No response from the server. Please try again later.'
+          } else {
+            searchError.value = `Error: ${error.message}`
+          }
+        } finally {
+          isSearching.value = false
+        }
+      }
+
+
       // Filter logic for table
       const filteredRecipes = computed(() => {
         if (!filterTerm.value.trim()) {
@@ -334,9 +414,14 @@
         deleteRecipe,
         deleteError,
         deleteSuccess,
+        searchTerm,
+        searchRecipe,
+        searchedRecipe,
+        searchError,
         isLoading,
         isDeleting,
         isUpserting,
+        isSearching,
         isValidGUID // Expose to template for disabling delete button if needed
       }
     }
@@ -434,7 +519,8 @@
   /* Search By ID, Upsert, Delete Sections */
   .search-id-section,
   .upsert-section,
-  .delete-section {
+  .delete-section,
+  .search-not-in-grid-section {
     margin: 2rem 0;
   }
 
@@ -452,7 +538,14 @@
     background-size: 10px 5px;
   }
 
-  .id-input,
+  .search-input {
+    width: 250px;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+  }
+
   .upsert-input {
     width: 250px;
     padding: 0.5rem;
@@ -483,6 +576,7 @@
       background-color: #cc0000;
     }
 
+  .searched-recipe-result,
   .single-recipe-result,
   .hint,
   .error-message,
