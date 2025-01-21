@@ -62,6 +62,9 @@
           <p><strong>Title:</strong> {{ singleRecipe.title }}</p>
           <p><strong>Ingredients:</strong> {{ singleRecipe.ingredients }}</p>
           <p><strong>Instructions:</strong> {{ singleRecipe.instructions }}</p>
+          <button class="edit-button" @click="loadRecipeForUpdate">
+            Edit Recipe
+          </button>
         </div>
         <div v-if="singleRecipeError" class="error-message">
           {{ singleRecipeError }}
@@ -95,6 +98,11 @@
       <!-- Upsert Recipe (POST /api/recipes/upsert) -->
       <section class="upsert-section">
         <h2>Create/Update Recipe</h2>
+        <!-- Hidden field for Upsert ID -->
+        <input class="upsert-input"
+               v-model="upsertId"
+               type="hidden" />
+
         <input class="upsert-input"
                v-model="upsertTitle"
                type="text"
@@ -152,14 +160,14 @@
 <script lang="ts">
   import { defineComponent, ref, onMounted, computed } from 'vue'
   import api from '@/api' // Ensure this path is correct based on alias configuration
-  import debounce from 'lodash.debounce'
-
 
   interface RecipeDto {
-    id?: string // Changed to string to accommodate GUID
-    title: string
-    ingredients: string
-    instructions: string
+    id: string; // Ensure this matches the backend's casing
+    title: string;
+    ingredients: string;
+    instructions: string;
+    description?: string;
+    cuisine?: string;
   }
 
   export default defineComponent({
@@ -183,6 +191,7 @@
       const isDeleting = ref(false)
 
       // Upsert (create/update) recipe fields
+      const upsertId = ref<string>('') // Hidden field for ID
       const upsertTitle = ref('')
       const upsertIngredients = ref('')
       const upsertInstructions = ref('')
@@ -211,6 +220,8 @@
           console.log('Fetched recipes:', recipes.value)
         } catch (error: any) {
           console.error('Error fetching recipes:', error)
+          // Optionally, display a user-friendly error message
+          alert('Failed to fetch recipes. Please try again later.')
         }
       }
 
@@ -259,6 +270,7 @@
 
         console.log('Attempting to upsert recipe...')
         console.log('Upsert Data:', {
+          id: upsertId.value, // Include ID if updating
           title: upsertTitle.value,
           ingredients: upsertIngredients.value,
           instructions: upsertInstructions.value
@@ -269,25 +281,35 @@
         isUpserting.value = true
 
         try {
-          const dataToSend = {
+          const dataToSend: Partial<RecipeDto> & { id?: string } = {
+            // Include ID if updating
+            ...(upsertId.value ? { id: upsertId.value } : {}),
             title: upsertTitle.value,
             ingredients: upsertIngredients.value,
             instructions: upsertInstructions.value
-            // If your API expects an ID for update, include it here
-            // id: ...
+            // Add description and cuisine if applicable
           }
-          const response = await api.post<RecipeDto>('/recipes/upsert', dataToSend)
-          // Refresh the main list after upsert
+
+          const response = await api.post<string>('/recipes/upsert', dataToSend)
+          // Assuming the response is a Job ID or Guid, you might want to inform the user
+          // Alternatively, you could fetch the updated list after some delay
           await fetchRecipes()
           // Clear form
+          upsertId.value = ''
           upsertTitle.value = ''
           upsertIngredients.value = ''
           upsertInstructions.value = ''
           upsertSuccess.value = 'Recipe upserted successfully!'
-          console.log('Upsert successful:', response.data)
+          console.log('Upsert successful, Response:', response.data)
         } catch (error: any) {
           console.error('Error upserting recipe:', error)
-          upsertError.value = 'An error occurred while upserting the recipe.'
+          if (error.response) {
+            upsertError.value = error.response.data.message || 'An error occurred while upserting the recipe.'
+          } else if (error.request) {
+            upsertError.value = 'No response from the server. Please try again later.'
+          } else {
+            upsertError.value = `Error: ${error.message}`
+          }
         } finally {
           isUpserting.value = false
         }
@@ -338,15 +360,6 @@
           searchedRecipe.value = null
           return
         }
-        const debouncedSearch = debounce(async () => {
-          await searchRecipe()
-        }, 300) // 300ms delay
-
-        watch(searchTerm, () => {
-          if (searchTerm.value.trim()) {
-            debouncedSearch()
-          }
-        })
 
         console.log('Attempting to search for recipe...')
         console.log('Search Term:', searchTerm.value)
@@ -381,6 +394,20 @@
         }
       }
 
+      // Load a recipe's details into the upsert form for editing
+      const loadRecipeForUpdate = () => {
+        if (!singleRecipe.value) {
+          upsertError.value = 'No recipe loaded to update.'
+          return
+        }
+
+        upsertId.value = singleRecipe.value.id
+        upsertTitle.value = singleRecipe.value.title
+        upsertIngredients.value = singleRecipe.value.ingredients
+        upsertInstructions.value = singleRecipe.value.instructions
+
+        upsertSuccess.value = 'Loaded recipe for update. Make your changes and click Upsert.'
+      }
 
       // Filter logic for table
       const filteredRecipes = computed(() => {
@@ -404,6 +431,7 @@
         singleRecipe,
         singleRecipeError,
         fetchRecipeById,
+        upsertId,
         upsertTitle,
         upsertIngredients,
         upsertInstructions,
@@ -422,11 +450,12 @@
         isDeleting,
         isUpserting,
         isSearching,
-        isValidGUID // Expose to template for disabling delete button if needed
+        isValidGUID, // Expose to template for disabling delete button if needed
+        loadRecipeForUpdate
       }
-    }
-  })
+    })
 </script>
+
 <style scoped>
   .page-container {
     font-family: Arial, sans-serif;
@@ -566,6 +595,21 @@
 
     .action-button:hover {
       background-color: #0069d9;
+    }
+
+  .edit-button {
+    padding: 0.3rem 0.6rem;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+    .edit-button:hover {
+      background-color: #218838;
     }
 
   .delete-button {

@@ -1,5 +1,3 @@
-// Program.cs
-using Hahn.Application.Commands.Recipies.Handlers;
 using Hahn.Data.Context;
 using Hahn.Data.Interfaces.Repositories;
 using Hahn.Data.Repositories;
@@ -23,8 +21,6 @@ var builder = Host.CreateDefaultBuilder(args)
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IRecipeRepository, RecipeRepository>();
             services.AddAutoMapper(typeof(MappingProfile));
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpsertFoodRecipeCommandHandler).Assembly));
-
             services.AddHangfireServer();
             services.AddHangfire(config =>
             {

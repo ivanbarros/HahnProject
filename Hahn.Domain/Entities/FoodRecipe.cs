@@ -1,11 +1,17 @@
 ﻿using Hahn.Domain.Entities.BaseEntity;
 using Hahn.Domain.Entities.Enums;
+using System.Text.Json.Serialization;
 
 namespace Hahn.Domain.Entities;
 public class FoodRecipe : CommonEntity
 {
+    [JsonPropertyName("strMeal")]
     public string Title { get; set; }
+
+    [JsonPropertyName("strInstructions")]
     public string Instructions { get; set; }
+
+    [JsonPropertyName("strIngredient1")]
     public string Ingredients { get; set; }
 
     private FoodRecipe() { }

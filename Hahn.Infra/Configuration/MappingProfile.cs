@@ -9,6 +9,7 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<FoodRecipe, FoodRecipeDto>();
+
         CreateMap<UpsertFoodRecipeDto, FoodRecipe>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
     }

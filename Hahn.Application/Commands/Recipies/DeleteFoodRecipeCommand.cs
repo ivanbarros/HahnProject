@@ -2,7 +2,7 @@
 
 namespace Hahn.Application.Commands.Recipies;
 
-public class DeleteFoodRecipeCommand : IRequest<Unit>
+public class DeleteFoodRecipeCommand : IRequest<bool>
 {
     public Guid Id { get; }
 

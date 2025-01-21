@@ -11,9 +11,15 @@ builder.Services.AddHangfire(config =>
     config.UseSqlServerStorage(
         builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddHttpClient("TheMealDb", client =>
+{
+    client.BaseAddress = new Uri("https://www.themealdb.com/api/json/v1/1/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 builder.Services.AddHangfireServer();
 
-// 2. Add Controllers
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
