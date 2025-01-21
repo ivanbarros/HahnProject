@@ -27,18 +27,18 @@ namespace Hahn.Jobs
             _logger.LogInformation("Attempting to upsert recipe: {Title}", title);
 
             // Check if recipe with the same title exists
-            var existingRecipes = await _recipeRepository.SearchByTitleAsync(title);
-            if (existingRecipes.Any())
+            var existingRecipies = await _recipeRepository.SearchByTitleAsync(title);
+            if (existingRecipies.Any())
             {
                 _logger.LogInformation("Recipe '{Title}' already exists. Skipping insert.", title);
                 // Return the existing recipe
-                var existingRecipe = _recipeRepository.MapToDto(existingRecipes.First());
+                var existingRecipe = _recipeRepository.MapToDto(existingRecipies.First());
                 JobResultStore.SetJobResult(jobId, existingRecipe);
                 return;
             }
 
             // Insert new recipe
-            var newRecipe = new FoodRecipe(title, ingredients, instructions);
+            var newRecipe = new FoodRecipies(title, ingredients, instructions);
             await _recipeRepository.AddAsync(newRecipe);
             await _recipeRepository.SaveChangesAsync();
 

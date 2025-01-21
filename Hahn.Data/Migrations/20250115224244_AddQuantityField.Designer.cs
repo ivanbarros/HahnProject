@@ -45,7 +45,7 @@ namespace Hahn.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FoodRecipes");
+                    b.ToTable("FoodRecipies");
                 });
 #pragma warning restore 612, 618
         }

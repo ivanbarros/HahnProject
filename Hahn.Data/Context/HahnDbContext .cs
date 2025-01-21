@@ -8,7 +8,7 @@ public class HahnDbContext : DbContext
     public HahnDbContext(DbContextOptions<HahnDbContext> options)
         : base(options) { }
 
-    public DbSet<FoodRecipe> FoodRecipes { get; set; }
+    public DbSet<FoodRecipies> FoodRecipies { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FrontEnd", "FrontEnd", "{A3
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "hahn.frontend", "Hahn.Frontend\hahn.frontend.esproj", "{E059D208-8982-4CE7-B45E-50B8CC69195E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{BE17C0F0-8176-450D-AB14-E16F0D0992D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

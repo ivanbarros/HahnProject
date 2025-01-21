@@ -3,41 +3,69 @@ using Hahn.Application.Queries.Recipies;
 using Hahn.Data.Dtos.Recipies;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Hahn.Application.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RecipesController : ControllerBase
+    public class RecipiesController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<RecipiesController> _logger;
 
-        public RecipesController(IMediator mediator)
+        public RecipiesController(IMediator mediator, IMemoryCache cache, ILogger<RecipiesController> logger)
         {
             _mediator = mediator;
+            _cache = cache;
+            _logger = logger;
         }
 
-        /// <summary>
-        /// Retrieves all recipes.
-        /// </summary>
-        /// <returns>List of all recipes.</returns>
         [HttpGet]
-        [SwaggerOperation(Summary = "Retrieves all recipes.")]
-        [SwaggerResponse(StatusCodes.Status200OK, "List of all recipes.", typeof(IEnumerable<FoodRecipeDto>))]
+        [SwaggerOperation(Summary = "Retrieves all Recipies.")]
+        [SwaggerResponse(StatusCodes.Status200OK, "List of all Recipies.", typeof(IEnumerable<FoodRecipeDto>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error.")]
-        public async Task<IEnumerable<FoodRecipeDto>> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
-            var query = new GetAllRecipesQuery();
-            return await _mediator.Send(query);
+            string cacheKey = $"GetAllRecipes_Page{pageNumber}_Size{pageSize}";
+
+            if (_cache.TryGetValue(cacheKey, out IEnumerable<FoodRecipeDto> cachedRecipes))
+            {
+                _logger.LogInformation("Returning cached recipes for {CacheKey}", cacheKey);
+                return Ok(cachedRecipes);
+            }
+
+            try
+            {
+                var query = new GetAllRecipiesQuery();
+                var recipes = await _mediator.Send(query);
+
+                // Set cache options.
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5))
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+
+                // Save data in cache.
+                _cache.Set(cacheKey, recipes, cacheEntryOptions);
+
+                _logger.LogInformation("Returning fetched recipes for {CacheKey}", cacheKey);
+                return Ok(recipes);
+            }
+            catch (TimeoutException ex)
+            {
+                _logger.LogError(ex, "Timeout occurred while fetching all recipes.");
+                return StatusCode(504, "The request timed out while fetching recipes. Please try again later.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while fetching all recipes.");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
-        /// <summary>
-        /// Retrieves a single recipe by its ID.
-        /// </summary>
-        /// <param name="id">The unique identifier of the recipe.</param>
-        /// <returns>The requested recipe.</returns>
+
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Retrieves a single recipe by its ID.")]
         [SwaggerResponse(StatusCodes.Status200OK, "The requested recipe.", typeof(FoodRecipeDto))]
@@ -54,11 +82,22 @@ namespace Hahn.Application.Controllers
             return Ok(recipe);
         }
 
-        /// <summary>
-        /// Creates or updates a recipe.
-        /// </summary>
-        /// <param name="dto">The recipe data transfer object.</param>
-        /// <returns>The created or updated recipe.</returns>
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchRecipiesByTitle([FromQuery] string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return BadRequest("Title parameter is required.");
+            }
+
+            var query = new SearchRecipiesByTitleQuery(title);
+            IEnumerable<FoodRecipeDto> recipies = await _mediator.Send(query);
+
+            return Ok(recipies);
+        }
+
+
         [HttpPost("upsert")]
         [SwaggerOperation(Summary = "Creates or updates a recipe.")]
         [SwaggerResponse(StatusCodes.Status200OK, "The created or updated recipe.", typeof(FoodRecipeDto))]
@@ -71,39 +110,7 @@ namespace Hahn.Application.Controllers
             return Ok(recipe);
         }
 
-        /// <summary>
-        /// Searches for recipes by title.
-        /// </summary>
-        /// <param name="title">The title of the recipe to search for.</param>
-        /// <returns>List of recipes matching the title.</returns>
-        [HttpGet("search")]
-        [SwaggerOperation(Summary = "Searches for recipes by title.")]
-        [SwaggerResponse(StatusCodes.Status200OK, "List of matching recipes.", typeof(IEnumerable<FoodRecipeDto>))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Title parameter is required.")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "No recipes found matching the provided title.")]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error.")]
-        public async Task<ActionResult<IEnumerable<FoodRecipeDto>>> SearchByTitle([FromQuery] string title)
-        {
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                return BadRequest("Title parameter is required.");
-            }
-
-            var query = new SearchRecipesByTitleQuery(title);
-            var recipes = await _mediator.Send(query);
-            if (recipes == null || !recipes.Any())
-            {
-                return NotFound("No recipes found matching the provided title.");
-            }
-
-            return Ok(recipes);
-        }
-
-        /// <summary>
-        /// Deletes a recipe by its ID.
-        /// </summary>
-        /// <param name="id">The unique identifier of the recipe to delete.</param>
-        /// <returns>No content if deletion is successful.</returns>
+       
         [HttpDelete("delete/{id}")]
         [SwaggerOperation(Summary = "Deletes a recipe by its ID.")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Recipe deleted successfully.")]

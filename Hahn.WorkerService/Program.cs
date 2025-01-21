@@ -37,15 +37,12 @@ var builder = Host.CreateDefaultBuilder(args)
                       });
             });
 
-            services.AddHangfireServer();
-
-           
+            services.AddHangfireServer();           
             services.AddTransient<RecipeInsertIfNotExistsJob>();
             services.AddTransient<RecipeUpsertJob>();
             services.AddTransient<RecipeDeleteJob>();
             services.AddTransient<RecipeGetAllJob>();
             services.AddTransient<RecipeGetByIdJob>();
-
             services.AddControllers();
         });
 

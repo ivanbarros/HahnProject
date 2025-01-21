@@ -3,11 +3,11 @@ using MediatR;
 
 namespace Hahn.Application.Queries.Recipies;
 
-public class SearchRecipesByTitleQuery : IRequest<IEnumerable<FoodRecipeDto>>
+public class SearchRecipiesByTitleQuery : IRequest<IEnumerable<FoodRecipeDto>>
 {
     public string Title { get; }
 
-    public SearchRecipesByTitleQuery(string title)
+    public SearchRecipiesByTitleQuery(string title)
     {
         Title = title;
     }

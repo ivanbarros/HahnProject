@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Hahn.Jobs.Utils;
 
-public static class JobResultStore
+public class JobResultStore
 {
     // Key: JobId, Value: TaskCompletionSource<object>
     private static ConcurrentDictionary<string, TaskCompletionSource<object>> _store = new ConcurrentDictionary<string, TaskCompletionSource<object>>();

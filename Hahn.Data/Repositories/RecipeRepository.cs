@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hahn.Data.Repositories;
 
-public class RecipeRepository : GenericRepository<FoodRecipe>, IRecipeRepository
+public class RecipeRepository : GenericRepository<FoodRecipies>, IRecipeRepository
 {
     private readonly IMapper _mapper;
     public RecipeRepository(HahnDbContext context, IMapper mapper) : base(context)
@@ -16,20 +16,20 @@ public class RecipeRepository : GenericRepository<FoodRecipe>, IRecipeRepository
         _mapper = mapper;
     }
   
-    public async Task<IEnumerable<FoodRecipe>> SearchByTitleAsync(string title)
+    public async Task<IEnumerable<FoodRecipies>> SearchByTitleAsync(string title)
     {
         return await _dbSet
             .Where(x => x.Title.Contains(title))
             .ToListAsync();
     }
 
-    public FoodRecipeDto MapToDto(FoodRecipe recipe)
+    public FoodRecipeDto MapToDto(FoodRecipies recipe)
     {
         return _mapper.Map<FoodRecipeDto>(recipe);
     }
 
-    public IEnumerable<FoodRecipeDto> MapToDtos(IEnumerable<FoodRecipe> recipes)
+    public IEnumerable<FoodRecipeDto> MapToDtos(IEnumerable<FoodRecipies> Recipies)
     {
-        return _mapper.Map<IEnumerable<FoodRecipeDto>>(recipes);
+        return _mapper.Map<IEnumerable<FoodRecipeDto>>(Recipies);
     }
 }

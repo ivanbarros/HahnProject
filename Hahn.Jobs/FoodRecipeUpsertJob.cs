@@ -18,27 +18,27 @@ public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
 
     public async Task RunUpsertAsync()
     {
-        var externalRecipes = await _externalClient.GetLatestRecipesAsync();
-        if (externalRecipes == null) return;
+        var externalRecipies = await _externalClient.GetLatestRecipiesAsync();
+        if (externalRecipies == null) return;
 
-        var currentRecipes = await _recipeRepo.GetAllAsync();
-        var currentTitles = currentRecipes.Select(r => r.Title.ToLower()).ToHashSet();
+        var currentRecipies = await _recipeRepo.GetAllAsync();
+        var currentTitles = currentRecipies.Select(r => r.Title.ToLower()).ToHashSet();
 
-        foreach (var ext in externalRecipes)
+        foreach (var ext in externalRecipies)
         {
             if (string.IsNullOrWhiteSpace(ext.Title)) continue;
 
             if (currentTitles.Contains(ext.Title.ToLower()))
             {
 
-                var existing = currentRecipes.FirstOrDefault(r =>
+                var existing = currentRecipies.FirstOrDefault(r =>
                     r.Title.ToLower() == ext.Title.ToLower());
                 existing.Update(ext.Title, ext.Instructions, ext.Ingredients);
             }
             else
             {
                 // Insert new
-                var newRecipe = new FoodRecipe(
+                var newRecipe = new FoodRecipies(
                     ext.Title, ext.Instructions, ext.Ingredients
                 );
                 await _recipeRepo.AddAsync(newRecipe);

@@ -3,7 +3,7 @@ using Hahn.Domain.Entities.Enums;
 using System.Text.Json.Serialization;
 
 namespace Hahn.Domain.Entities;
-public class FoodRecipe : CommonEntity
+public class FoodRecipies : CommonEntity
 {
     [JsonPropertyName("strMeal")]
     public string Title { get; set; }
@@ -14,9 +14,9 @@ public class FoodRecipe : CommonEntity
     [JsonPropertyName("strIngredient1")]
     public string Ingredients { get; set; }
 
-    private FoodRecipe() { }
+    private FoodRecipies() { }
 
-    public FoodRecipe(string title, string instructions, string ingredients)
+    public FoodRecipies(string title, string instructions, string ingredients)
     {
         Title = title;
         Instructions = instructions;

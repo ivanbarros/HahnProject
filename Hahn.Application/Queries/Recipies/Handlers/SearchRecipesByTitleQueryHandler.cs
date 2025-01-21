@@ -7,14 +7,14 @@ using System.Text.Json;
 
 namespace Hahn.Application.Queries.Recipies.Handlers
 {
-    public class SearchRecipesByTitleQueryHandler : IRequestHandler<SearchRecipesByTitleQuery, IEnumerable<FoodRecipeDto>>
+    public class SearchRecipiesByTitleQueryHandler : IRequestHandler<SearchRecipiesByTitleQuery, IEnumerable<FoodRecipeDto>>
     {
         private readonly IRecipeRepository _recipeRepository;
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<SearchRecipesByTitleQueryHandler> _logger;
+        private readonly ILogger<SearchRecipiesByTitleQueryHandler> _logger;
 
-        public SearchRecipesByTitleQueryHandler(IRecipeRepository recipeRepository, IMapper mapper, IHttpClientFactory httpClientFactory, ILogger<SearchRecipesByTitleQueryHandler> logger)
+        public SearchRecipiesByTitleQueryHandler(IRecipeRepository recipeRepository, IMapper mapper, IHttpClientFactory httpClientFactory, ILogger<SearchRecipiesByTitleQueryHandler> logger)
         {
             _recipeRepository = recipeRepository;
             _mapper = mapper;
@@ -22,9 +22,9 @@ namespace Hahn.Application.Queries.Recipies.Handlers
             _logger = logger;
         }
 
-        public async Task<IEnumerable<FoodRecipeDto>> Handle(SearchRecipesByTitleQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<FoodRecipeDto>> Handle(SearchRecipiesByTitleQuery request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Searching for recipes with title: {Title}", request.Title);
+            _logger.LogInformation("Searching for Recipies with title: {Title}", request.Title);
 
             if (string.IsNullOrWhiteSpace(request.Title))
             {
@@ -34,13 +34,13 @@ namespace Hahn.Application.Queries.Recipies.Handlers
             string trimmedTitle = request.Title.Trim();
 
             // 1. Search in the local database
-            var matchingRecipes = await _recipeRepository.SearchByTitleAsync(trimmedTitle);
+            var matchingRecipies = await _recipeRepository.SearchByTitleAsync(trimmedTitle);
 
-            if (matchingRecipes != null && matchingRecipes.Any())
+            if (matchingRecipies != null && matchingRecipies.Any())
             {
-                _logger.LogInformation("Found {Count} recipe(s) locally.", matchingRecipes.Count());
+                _logger.LogInformation("Found {Count} recipe(s) locally.", matchingRecipies.Count());
 
-                var localRecipeDtos = _mapper.Map<IEnumerable<FoodRecipeDto>>(matchingRecipes);
+                var localRecipeDtos = _mapper.Map<IEnumerable<FoodRecipeDto>>(matchingRecipies);
                 return localRecipeDtos;
             }
 
@@ -51,11 +51,11 @@ namespace Hahn.Application.Queries.Recipies.Handlers
             {
                 _logger.LogInformation("Found {Count} recipe(s) via external API.", externalRecipeDtos.Count());
 
-                // Optionally, save the external recipes to the local database
+                // Optionally, save the external Recipies to the local database
                 foreach (var recipeDto in externalRecipeDtos)
                 {
                     // Convert DTO back to Entity for persistence
-                    var recipeEntity = new FoodRecipe(recipeDto.Title, recipeDto.Ingredients, recipeDto.Instructions);
+                    var recipeEntity = new FoodRecipies(recipeDto.Title, recipeDto.Ingredients, recipeDto.Instructions);
 
                     await _recipeRepository.AddAsync(recipeEntity);
                 }
@@ -64,7 +64,7 @@ namespace Hahn.Application.Queries.Recipies.Handlers
             }
 
             // 3. If not found externally, return empty
-            _logger.LogInformation("No recipes found for title: {Title}", trimmedTitle);
+            _logger.LogInformation("No Recipies found for title: {Title}", trimmedTitle);
             return Enumerable.Empty<FoodRecipeDto>();
         }
 
@@ -121,12 +121,6 @@ namespace Hahn.Application.Queries.Recipies.Handlers
                 return Enumerable.Empty<FoodRecipeDto>();
             }
         }
-
-        /// <summary>
-        /// Combines the ingredients and measures from the external API response into a single string.
-        /// </summary>
-        /// <param name="meal">The meal object from the external API.</param>
-        /// <returns>A formatted string of ingredients and measures.</returns>
         private string CombineIngredients(Meal meal)
         {
             var ingredients = new List<string>();

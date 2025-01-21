@@ -6,7 +6,7 @@ namespace Hahn.Data.Interfaces.ExternalServices;
 
 public interface IExternalFoodApiClient
 {
-    Task<IEnumerable<FoodRecipeDto>> GetLatestRecipesAsync();
+    Task<IEnumerable<FoodRecipeDto>> GetLatestRecipiesAsync();
 }
 
 public class ExternalFoodApiClient : IExternalFoodApiClient
@@ -20,9 +20,9 @@ public class ExternalFoodApiClient : IExternalFoodApiClient
         _baseUrl = config.GetConnectionString("ExternalFoodApiBaseUrl");
     }
 
-    public async Task<IEnumerable<FoodRecipeDto>> GetLatestRecipesAsync()
+    public async Task<IEnumerable<FoodRecipeDto>> GetLatestRecipiesAsync()
     {
-        var response = await _httpClient.GetAsync($"{_baseUrl}/recipes");
+        var response = await _httpClient.GetAsync($"{_baseUrl}/Recipies");
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();

@@ -18,6 +18,8 @@ builder.Services.AddHttpClient("TheMealDb", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddHangfireServer();
 
 builder.Services.AddControllers();

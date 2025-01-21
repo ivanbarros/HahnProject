@@ -2,7 +2,7 @@
   <div id="app" class="app-container">
    
     <header class="app-header">
-      <h1 class="app-title">My Great Recipes</h1>
+      <h1 class="app-title">My Great Recipies</h1>
       <p class="app-subtitle">Discover, filter, and enjoy your perfect meal!</p>
     </header>
 

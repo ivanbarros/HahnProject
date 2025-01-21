@@ -44,7 +44,7 @@ namespace Hahn.Jobs
                 else
                 {
                     // If recipe doesn't exist, create a new one
-                    var newRecipe = new FoodRecipe(title, ingredients, instructions);
+                    var newRecipe = new FoodRecipies(title, ingredients, instructions);
                     await _recipeRepository.AddAsync(newRecipe);
                     await _recipeRepository.SaveChangesAsync();
 
@@ -55,7 +55,7 @@ namespace Hahn.Jobs
             else
             {
                 // Create new recipe
-                var newRecipe = new FoodRecipe(title, ingredients, instructions);
+                var newRecipe = new FoodRecipies(title, ingredients, instructions);
                 await _recipeRepository.AddAsync(newRecipe);
                 await _recipeRepository.SaveChangesAsync();
 

@@ -4,9 +4,9 @@ using Hahn.Domain.Entities;
 
 namespace Hahn.Data.Interfaces.Repositories;
 
-public interface IRecipeRepository : IGenericRepository<FoodRecipe>
+public interface IRecipeRepository : IGenericRepository<FoodRecipies>
 {
-    Task<IEnumerable<FoodRecipe>> SearchByTitleAsync(string title);
-    FoodRecipeDto MapToDto(FoodRecipe recipe);
-    IEnumerable<FoodRecipeDto> MapToDtos(IEnumerable<FoodRecipe> recipes);
+    Task<IEnumerable<FoodRecipies>> SearchByTitleAsync(string title);
+    FoodRecipeDto MapToDto(FoodRecipies recipe);
+    IEnumerable<FoodRecipeDto> MapToDtos(IEnumerable<FoodRecipies> Recipies);
 }

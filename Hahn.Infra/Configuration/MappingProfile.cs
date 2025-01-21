@@ -8,9 +8,9 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<FoodRecipe, FoodRecipeDto>();
+        CreateMap<FoodRecipies, FoodRecipeDto>();
 
-        CreateMap<UpsertFoodRecipeDto, FoodRecipe>()
+        CreateMap<UpsertFoodRecipeDto, FoodRecipies>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
     }
 }

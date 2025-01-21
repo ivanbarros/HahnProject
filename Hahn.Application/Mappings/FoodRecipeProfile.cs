@@ -8,8 +8,8 @@ public class FoodRecipeProfile : Profile
 {
     public FoodRecipeProfile()
     {
-        CreateMap<FoodRecipe, FoodRecipeDto>().ReverseMap();
-        CreateMap<UpsertFoodRecipeDto, FoodRecipe>();
-        CreateMap<UpdateFoodRecipeDto, FoodRecipe>();
+        CreateMap<FoodRecipies, FoodRecipeDto>().ReverseMap();
+        CreateMap<UpsertFoodRecipeDto, FoodRecipies>();
+        CreateMap<UpdateFoodRecipeDto, FoodRecipies>();
     }
 }

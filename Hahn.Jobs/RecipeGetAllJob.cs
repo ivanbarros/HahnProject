@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace Hahn.Jobs;
 
 /// <summary>
-/// Hangfire job that retrieves all recipes.
+/// Hangfire job that retrieves all Recipies.
 /// </summary>
 public class RecipeGetAllJob
 {
@@ -22,14 +22,14 @@ public class RecipeGetAllJob
 
     public async Task RunAsync(string jobId)
     {
-        _logger.LogInformation("Job {JobId}: Fetching all recipes.", jobId);
+        _logger.LogInformation("Job {JobId}: Fetching all Recipies.", jobId);
 
         try
         {
-            var recipes = await _recipeRepository.GetAllAsync();
-            var recipeDtos = _recipeRepository.MapToDtos(recipes);
+            var Recipies = await _recipeRepository.GetAllAsync();
+            var recipeDtos = _recipeRepository.MapToDtos(Recipies);
 
-            _logger.LogInformation("Job {JobId}: Retrieved {Count} recipes.", jobId, recipeDtos.Count());
+            _logger.LogInformation("Job {JobId}: Retrieved {Count} Recipies.", jobId, recipeDtos.Count());
 
             // Explicitly specify the type parameter
             JobResultStore.SetJobResult<IEnumerable<FoodRecipeDto>>(jobId, recipeDtos);
@@ -38,7 +38,7 @@ public class RecipeGetAllJob
         }
         catch (System.Exception ex)
         {
-            _logger.LogError(ex, "Job {JobId}: An error occurred while fetching recipes.", jobId);
+            _logger.LogError(ex, "Job {JobId}: An error occurred while fetching Recipies.", jobId);
             // Optionally, set a default or error result
             JobResultStore.SetJobResult<IEnumerable<FoodRecipeDto>>(jobId, null);
         }

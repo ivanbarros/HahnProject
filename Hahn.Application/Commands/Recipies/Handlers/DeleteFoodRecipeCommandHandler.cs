@@ -19,7 +19,7 @@ namespace Hahn.Application.Commands.Recipies.Handlers
         public async Task<bool> Handle(DeleteFoodRecipeCommand request, CancellationToken cancellationToken)
         {
             // Map the command to Recipe entity
-            var recipeEntity = _mapper.Map<FoodRecipe>(request);
+            var recipeEntity = _mapper.Map<FoodRecipies>(request);
 
             // Call the repository to remove the recipe
             var success = await _recipeRepository.RemoveAsync(recipeEntity);
