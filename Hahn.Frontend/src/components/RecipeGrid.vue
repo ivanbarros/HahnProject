@@ -1,3 +1,5 @@
+<!-- src/components/RecipeGrid.vue -->
+
 <template>
   <div class="page-container">
     <!-- Page Header -->
@@ -8,7 +10,7 @@
 
     <!-- Main Content -->
     <main>
-      <!-- Filter & Refresh Section (GET all Recipes) -->
+      <!-- Filter & Refresh Section -->
       <section class="filter-section">
         <label for="recipeFilter" class="filter-label">Search by Title</label>
         <input id="recipeFilter"
@@ -70,7 +72,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted } from 'vue';
+  import { defineComponent, onMounted, watch } from 'vue';
   import { useRecipes } from '@/composables/useRecipeGrid';
 
   export default defineComponent({
@@ -82,6 +84,14 @@
       onMounted(() => {
         recipeGrid.fetchRecipes();
       });
+
+      // Watch for changes in filteredRecipes
+      watch(
+        () => recipeGrid.filteredRecipes,
+        (newVal) => {
+          console.log('Filtered Recipes:', newVal); // Debugging Line
+        }
+      );
 
       // Method to delete a recipe by ID with confirmation
       const confirmDelete = (id: string) => {

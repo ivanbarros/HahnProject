@@ -8,45 +8,40 @@
 
 .page-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
-.page-title {
-    font-size: 2.5em;
-    margin-bottom: 10px;
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.page-subtitle {
-    font-size: 1.2em;
-    color: #666;
+.filter-label {
+    font-weight: bold;
 }
 
-.filter-section,
-.search-id-section,
-.search-not-in-grid-section,
-.upsert-section,
-.delete-section {
-    margin-bottom: 30px;
-}
-
-.filter-input,
-.search-input,
-.recipe-select,
-.upsert-input {
+.filter-input {
+    flex: 1;
     padding: 8px;
     font-size: 16px;
-    width: 300px;
-    margin-right: 10px;
 }
 
-.filter-button,
-.action-button,
-.submit-button,
-.back-button {
+.filter-button {
     padding: 8px 16px;
     font-size: 16px;
+    background-color: #2196f3;
+    color: white;
+    border: none;
     cursor: pointer;
+    border-radius: 4px;
 }
+
+    .filter-button:disabled {
+        background-color: #90caf9;
+        cursor: not-allowed;
+    }
 
 .recipe-table {
     width: 100%;
@@ -57,52 +52,39 @@
     .recipe-table td {
         border: 1px solid #ddd;
         padding: 8px;
+        text-align: left;
     }
 
     .recipe-table th {
         background-color: #f2f2f2;
     }
 
-.action-button.view-button {
-    background-color: #4caf50;
-    color: white;
-    border: none;
+.action-button {
     margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
 }
 
-.action-button.edit-button {
+.view-button {
     background-color: #2196f3;
-    color: white;
-    border: none;
-    margin-right: 5px;
 }
 
-.action-button.delete-button {
+.edit-button {
+    background-color: #ff9800;
+}
+
+.delete-button {
     background-color: #f44336;
-    color: white;
-    border: none;
 }
 
 .loading-spinner,
-.loading {
+.no-recipes {
     text-align: center;
+    margin-top: 20px;
     font-size: 18px;
     color: #555;
-}
-
-.no-recipes,
-.not-found {
-    text-align: center;
-    font-size: 18px;
-    color: #555;
-}
-
-.success-message {
-    color: green;
-    margin-top: 10px;
-}
-
-.error-message {
-    color: red;
-    margin-top: 10px;
 }

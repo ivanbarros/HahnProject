@@ -29,6 +29,7 @@ export function useRecipes() {
     try {
       const response = await api.get<FoodRecipeDto[]>('/Recipies');
       recipes.value = response.data;
+      console.log('Fetched Recipes:', recipes.value); // Debugging Line
     } catch (error: any) {
       console.error('Error fetching recipes:', error);
       toast.error('Failed to fetch recipes.');
