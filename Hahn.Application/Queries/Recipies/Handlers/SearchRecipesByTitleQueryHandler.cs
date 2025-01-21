@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hahn.Application.Commands.Recipies;
 using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
 using Hahn.Domain.Entities;
@@ -13,13 +14,20 @@ namespace Hahn.Application.Queries.Recipies.Handlers
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<SearchRecipiesByTitleQueryHandler> _logger;
+        private readonly IMediator _mediator;
 
-        public SearchRecipiesByTitleQueryHandler(IRecipeRepository recipeRepository, IMapper mapper, IHttpClientFactory httpClientFactory, ILogger<SearchRecipiesByTitleQueryHandler> logger)
+        public SearchRecipiesByTitleQueryHandler(
+            IRecipeRepository recipeRepository,
+            IMapper mapper,
+            IHttpClientFactory httpClientFactory,
+            ILogger<SearchRecipiesByTitleQueryHandler> logger,
+            IMediator mediator)
         {
             _recipeRepository = recipeRepository;
             _mapper = mapper;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task<IEnumerable<FoodRecipeDto>> Handle(SearchRecipiesByTitleQuery request, CancellationToken cancellationToken)
@@ -43,33 +51,24 @@ namespace Hahn.Application.Queries.Recipies.Handlers
                 var localRecipeDtos = _mapper.Map<IEnumerable<FoodRecipeDto>>(matchingRecipies);
                 return localRecipeDtos;
             }
+               
 
-            // 2. If not found locally, search the external API
             var externalRecipeDtos = await SearchExternalApiAsync(trimmedTitle, cancellationToken);
 
             if (externalRecipeDtos != null && externalRecipeDtos.Any())
             {
                 _logger.LogInformation("Found {Count} recipe(s) via external API.", externalRecipeDtos.Count());
-
-                // Optionally, save the external Recipies to the local database
-                foreach (var recipeDto in externalRecipeDtos)
-                {
-                    // Convert DTO back to Entity for persistence
-                    var recipeEntity = new FoodRecipies(recipeDto.Title, recipeDto.Ingredients, recipeDto.Instructions);
-
-                    await _recipeRepository.AddAsync(recipeEntity);
-                }
-
                 return externalRecipeDtos;
             }
 
-            // 3. If not found externally, return empty
+            
             _logger.LogInformation("No Recipies found for title: {Title}", trimmedTitle);
             return Enumerable.Empty<FoodRecipeDto>();
         }
 
         private async Task<IEnumerable<FoodRecipeDto>> SearchExternalApiAsync(string title, CancellationToken cancellationToken)
         {
+            List<FoodRecipeDto> listRecipies = new List<FoodRecipeDto>();
             var client = _httpClientFactory.CreateClient("TheMealDb");
             string requestUri = $"search.php?s={Uri.EscapeDataString(title)}";
 
@@ -94,8 +93,7 @@ namespace Hahn.Application.Queries.Recipies.Handlers
                     _logger.LogInformation("External API returned no meals for title: {Title}", title);
                     return Enumerable.Empty<FoodRecipeDto>();
                 }
-
-                // Map external API meals to FoodRecipeDto
+               
                 var externalRecipeDtos = apiResponse.Meals.Select(meal => new FoodRecipeDto
                 {
                     Title = meal.StrMeal,
@@ -103,7 +101,18 @@ namespace Hahn.Application.Queries.Recipies.Handlers
                     Instructions = meal.StrInstructions
                 });
 
-                return externalRecipeDtos;
+                foreach (var item in externalRecipeDtos)
+                {
+                    var recipe = new FoodRecipeDto {Ingredients = item.Ingredients, Instructions = item.Instructions, Title = item.Title };
+                    listRecipies.Add(recipe);
+                    var recipeUpsertDto = new UpsertFoodRecipeDto { Ingredients = recipe.Ingredients, Instructions = recipe.Instructions, Title = recipe.Title };
+                    var recipeCommand = new UpsertFoodRecipeCommand(recipeUpsertDto);
+                    await _mediator.Send(recipeCommand);
+                    
+                }
+                
+
+                return listRecipies;
             }
             catch (HttpRequestException ex)
             {

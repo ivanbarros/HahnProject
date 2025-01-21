@@ -1,31 +1,30 @@
 ﻿using AutoMapper;
+using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
+using Hahn.Data.Interfaces.Repositories.BaseRepository;
 using Hahn.Domain.Entities;
+using Hahn.Jobs;
+using Hahn.Jobs.Utils;
+using Hangfire;
 using MediatR;
 
-namespace Hahn.Application.Commands.Recipies.Handlers
+namespace Hahn.Application.Commands.Recipies.Handlers;
+
+public class DeleteFoodRecipeCommandHandler : IRequestHandler<DeleteFoodRecipeCommand, bool>
 {
-    public class DeleteFoodRecipeCommandHandler : IRequestHandler<DeleteFoodRecipeCommand, bool>
+   
+    public async Task<bool> Handle(DeleteFoodRecipeCommand request, CancellationToken cancellationToken)
     {
-        private readonly IRecipeRepository _recipeRepository;
-        private readonly IMapper _mapper;
+        var jobId = JobResultStore.RegisterJob();
 
-        public DeleteFoodRecipeCommandHandler(IRecipeRepository recipeRepository, IMapper mapper)
-        {
-            _recipeRepository = recipeRepository;
-            _mapper = mapper;
-        }
+        BackgroundJob.Enqueue<RecipeDeleteJob>(
+            job => job.RunAsync(
+                request.Id,
+                jobId));
 
-        public async Task<bool> Handle(DeleteFoodRecipeCommand request, CancellationToken cancellationToken)
-        {
-            // Map the command to Recipe entity
-            var recipeEntity = _mapper.Map<FoodRecipies>(request);
-
-            // Call the repository to remove the recipe
-            var success = await _recipeRepository.RemoveAsync(recipeEntity);
-
-            return success;
-        }
+        var recipe = await JobResultStore.GetJobResultAsync<FoodRecipeDto>(jobId, timeoutSeconds: 30);
+       
+        return true;
     }
 }
 

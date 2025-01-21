@@ -1,13 +1,12 @@
 // src/composables/useRecipeGrid.ts
 
 import { ref, computed } from 'vue';
-import api from '@/api';
+import api from '@/services/api';
 import type { FoodRecipeDto } from '@/types/FoodRecipeDto';
-import type { UpsertFoodRecipeDto } from '@/types/UpsertFoodRecipeDto';
 
 export function useRecipeGrid() {
   // Reactive state variables
-  const recipies = ref<FoodRecipeDto[]>([]);
+  const recipes = ref<FoodRecipeDto[]>([]);
   const filterTerm = ref<string>('');
   const selectedRecipeId = ref<string>('');
   const singleRecipe = ref<FoodRecipeDto | null>(null);
@@ -30,33 +29,28 @@ export function useRecipeGrid() {
   const isLoading = ref<boolean>(false);
   const isSearching = ref<boolean>(false);
   const isUpserting = ref<boolean>(false);
-  const isDeleting = ref<boolean>(false); // Corrected line
+  const isDeleting = ref<boolean>(false);
 
   // Computed property for filtered recipes
-  const filteredRecipies = computed(() => {
+  const filteredRecipes = computed(() => {
     if (!filterTerm.value) {
-      return recipies.value;
+      return recipes.value;
     }
-    return recipies.value.filter((recipe) =>
+    return recipes.value.filter((recipe) =>
       recipe.title.toLowerCase().includes(filterTerm.value.toLowerCase())
     );
   });
 
-  // Fetch all recipes with pagination
-  const fetchRecipies = async (pageNumber = 1, pageSize = 20) => {
+  // Fetch all recipes
+  const fetchRecipes = async () => {
     isLoading.value = true;
-    recipies.value = [];
+    recipes.value = [];
     try {
-      const response = await api.get<FoodRecipeDto[]>('/Recipies', {
-        params: {
-          pageNumber,
-          pageSize,
-        },
-      });
-      recipies.value = response.data;
+      const response = await api.get<FoodRecipeDto[]>('/Recipies');
+      recipes.value = response.data;
     } catch (error: any) {
-      console.error('Error fetching Recipies:', error);
-      // Optionally, set a global error state
+      console.error('Error fetching Recipes:', error);
+      // Optionally, set a global error state or notify the user
     } finally {
       isLoading.value = false;
     }
@@ -120,8 +114,8 @@ export function useRecipeGrid() {
     upsertError.value = null;
     upsertSuccess.value = null;
 
-    const upsertDto: UpsertFoodRecipeDto = {
-      id: upsertId.value ? upsertId.value : null, // Null for creation
+    const upsertDto = {
+      id: upsertId.value || null, // Null for creation
       title: upsertTitle.value,
       ingredients: upsertIngredients.value,
       instructions: upsertInstructions.value,
@@ -134,7 +128,7 @@ export function useRecipeGrid() {
       const response = await api.post<FoodRecipeDto>('/Recipies/upsert', upsertDto);
       upsertSuccess.value = `Recipe "${response.data.title}" has been successfully upserted.`;
       // Refresh the recipes list
-      await fetchRecipies();
+      await fetchRecipes();
       // Reset the form
       resetUpsertForm();
     } catch (error: any) {
@@ -180,7 +174,7 @@ export function useRecipeGrid() {
       await api.delete(`/Recipies/delete/${selectedDeleteRecipeId.value}`);
       deleteSuccess.value = 'Recipe has been successfully deleted.';
       // Refresh the recipes list
-      await fetchRecipies();
+      await fetchRecipes();
       // Reset selection
       selectedDeleteRecipeId.value = '';
     } catch (error: any) {
@@ -193,7 +187,7 @@ export function useRecipeGrid() {
 
   return {
     // State variables
-    recipies,
+    recipes,
     filterTerm,
     selectedRecipeId,
     singleRecipe,
@@ -218,9 +212,9 @@ export function useRecipeGrid() {
     isUpserting,
     isDeleting,
     // Computed properties
-    filteredRecipies,
+    filteredRecipes,
     // Methods
-    fetchRecipies,
+    fetchRecipes,
     fetchRecipeById,
     searchRecipe,
     upsertRecipe,

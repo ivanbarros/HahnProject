@@ -12,6 +12,7 @@ public class HahnDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<FoodRecipies>()
+            .ToTable("FoodRecipies");
     }
 }

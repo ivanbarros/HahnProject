@@ -27,16 +27,8 @@ namespace Hahn.Application.Controllers
         [SwaggerOperation(Summary = "Retrieves all Recipies.")]
         [SwaggerResponse(StatusCodes.Status200OK, "List of all Recipies.", typeof(IEnumerable<FoodRecipeDto>))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error.")]
-        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetAll()
         {
-            string cacheKey = $"GetAllRecipes_Page{pageNumber}_Size{pageSize}";
-
-            if (_cache.TryGetValue(cacheKey, out IEnumerable<FoodRecipeDto> cachedRecipes))
-            {
-                _logger.LogInformation("Returning cached recipes for {CacheKey}", cacheKey);
-                return Ok(cachedRecipes);
-            }
-
             try
             {
                 var query = new GetAllRecipiesQuery();
@@ -46,11 +38,7 @@ namespace Hahn.Application.Controllers
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5))
                     .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-                // Save data in cache.
-                _cache.Set(cacheKey, recipes, cacheEntryOptions);
-
-                _logger.LogInformation("Returning fetched recipes for {CacheKey}", cacheKey);
+              
                 return Ok(recipes);
             }
             catch (TimeoutException ex)

@@ -1,14 +1,10 @@
-﻿using Hahn.Jobs.Utils;
-using Hahn.Data.Interfaces.Repositories;
-using Hahn.Domain.Entities;
+﻿using Hahn.Data.Interfaces.Repositories;
+using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace Hahn.Jobs
 {
-    /// <summary>
-    /// Hangfire job that deletes a recipe by ID.
-    /// </summary>
+    
     public class RecipeDeleteJob
     {
         private readonly IRecipeRepository _recipeRepository;
@@ -32,7 +28,7 @@ namespace Hahn.Jobs
                 return;
             }
 
-            _recipeRepository.RemoveAsync(recipe);
+            await _recipeRepository.RemoveAsync(recipe);
             await _recipeRepository.SaveChangesAsync();
 
             _logger.LogInformation("Recipe with ID {Id} deleted successfully.", id);

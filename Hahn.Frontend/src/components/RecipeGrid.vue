@@ -13,13 +13,13 @@
       <!-- Filter & Refresh Section (GET all Recipes) -->
       <section class="filter-section">
         <label for="recipeFilter" class="filter-label">Search by Title</label>
-        <input id="recipeFilter"
-               class="filter-input"
-               v-model="filterTerm"
-               placeholder="Filter by title..." />
-        <button class="filter-button"
-                @click="fetchRecipies"
-                :disabled="isLoading">
+        <input
+          id="recipeFilter"
+          class="filter-input"
+          v-model="filterTerm"
+          placeholder="Filter by title..."
+        />
+        <button class="filter-button" @click="fetchRecipies" :disabled="isLoading">
           {{ isLoading ? 'Loading...' : 'Refresh' }}
         </button>
       </section>
@@ -41,12 +41,13 @@
               <td>{{ recipe.ingredients }}</td>
               <td>{{ recipe.instructions }}</td>
               <td>
-                <button class="action-button edit-button"
-                        @click="loadRecipeForUpdate(recipe)">
+                <button class="action-button edit-button" @click="loadRecipeForUpdate(recipe)">
                   Edit
                 </button>
-                <button class="action-button delete-button"
-                        @click="deleteRecipeById(recipe.id)">
+                <button
+                  class="action-button delete-button"
+                  @click="deleteRecipeById(recipe.id)"
+                >
                   Delete
                 </button>
               </td>
@@ -66,15 +67,15 @@
         <h2>Find Recipe by Selection</h2>
         <select class="recipe-select" v-model="selectedRecipeId">
           <option disabled value="">-- Select a Recipe --</option>
-          <option v-for="recipe in recipies"
-                  :key="recipe.id"
-                  :value="recipe.id">
+          <option v-for="recipe in recipies" :key="recipe.id" :value="recipe.id">
             {{ recipe.title }}
           </option>
         </select>
-        <button class="action-button"
-                @click="fetchRecipeById"
-                :disabled="!selectedRecipeId || isLoading">
+        <button
+          class="action-button"
+          @click="fetchRecipeById"
+          :disabled="!selectedRecipeId || isLoading"
+        >
           {{ isLoading ? 'Loading...' : 'Search' }}
         </button>
 
@@ -83,8 +84,7 @@
           <p><strong>Title:</strong> {{ singleRecipe.title }}</p>
           <p><strong>Ingredients:</strong> {{ singleRecipe.ingredients }}</p>
           <p><strong>Instructions:</strong> {{ singleRecipe.instructions }}</p>
-          <button class="edit-button"
-                  @click="loadRecipeForUpdate(singleRecipe)">
+          <button class="edit-button" @click="loadRecipeForUpdate(singleRecipe)">
             Edit Recipe
           </button>
         </div>
@@ -96,13 +96,17 @@
       <!-- Search for a Recipe Not in the Grid -->
       <section class="search-not-in-grid-section">
         <h2>Search for a Recipe</h2>
-        <input class="search-input"
-               v-model="searchTerm"
-               type="text"
-               placeholder="Enter recipe title..." />
-        <button class="action-button"
-                @click="searchRecipe"
-                :disabled="!searchTerm.trim() || isSearching">
+        <input
+          class="search-input"
+          v-model="searchTerm"
+          type="text"
+          placeholder="Enter recipe title..."
+        />
+        <button
+          class="action-button"
+          @click="searchRecipe"
+          :disabled="!searchTerm.trim() || isSearching"
+        >
           {{ isSearching ? 'Searching...' : 'Search' }}
         </button>
 
@@ -121,37 +125,49 @@
       <section class="upsert-section">
         <h2>Create/Update Recipe</h2>
         <!-- Hidden field for Upsert ID -->
-        <input class="upsert-input"
-               v-model="upsertId"
-               type="hidden" />
+        <input class="upsert-input" v-model="upsertId" type="hidden" />
 
-        <input class="upsert-input"
-               v-model="upsertTitle"
-               type="text"
-               placeholder="Recipe Title" />
-        <input class="upsert-input"
-               v-model="upsertIngredients"
-               type="text"
-               placeholder="Ingredients" />
-        <input class="upsert-input"
-               v-model="upsertInstructions"
-               type="text"
-               placeholder="Instructions" />
-        <input class="upsert-input"
-               v-model="upsertMeasure"
-               type="text"
-               placeholder="Measure" />
-        <input class="upsert-input"
-               v-model="upsertDescription"
-               type="text"
-               placeholder="Description" />
-        <input class="upsert-input"
-               v-model="upsertCuisine"
-               type="text"
-               placeholder="Cuisine" />
-        <button class="action-button"
-                @click="upsertRecipe"
-                :disabled="!upsertTitle || !upsertIngredients || !upsertInstructions || isUpserting">
+        <input
+          class="upsert-input"
+          v-model="upsertTitle"
+          type="text"
+          placeholder="Recipe Title"
+        />
+        <input
+          class="upsert-input"
+          v-model="upsertIngredients"
+          type="text"
+          placeholder="Ingredients"
+        />
+        <input
+          class="upsert-input"
+          v-model="upsertInstructions"
+          type="text"
+          placeholder="Instructions"
+        />
+        <input
+          class="upsert-input"
+          v-model="upsertMeasure"
+          type="text"
+          placeholder="Measure"
+        />
+        <input
+          class="upsert-input"
+          v-model="upsertDescription"
+          type="text"
+          placeholder="Description"
+        />
+        <input
+          class="upsert-input"
+          v-model="upsertCuisine"
+          type="text"
+          placeholder="Cuisine"
+        />
+        <button
+          class="action-button"
+          @click="upsertRecipe"
+          :disabled="!upsertTitle || !upsertIngredients || !upsertInstructions || isUpserting"
+        >
           {{ isUpserting ? 'Upserting...' : 'Upsert' }}
         </button>
 
@@ -166,18 +182,20 @@
       <!-- Delete Recipe (DELETE /api/Recipies/delete/{id}) -->
       <section class="delete-section">
         <h2>Delete Recipe by Selection</h2>
-        <select class="recipe-select"
-                v-model="selectedDeleteRecipeId">
+        <select
+          class="recipe-select"
+          v-model="selectedDeleteRecipeId"
+        >
           <option disabled value="">-- Select a Recipe to Delete --</option>
-          <option v-for="recipe in recipies"
-                  :key="recipe.id"
-                  :value="recipe.id">
+          <option v-for="recipe in recipies" :key="recipe.id" :value="recipe.id">
             {{ recipe.title }}
           </option>
         </select>
-        <button class="action-button delete-button"
-                @click="deleteRecipeById(recipe.id)"
-                :disabled="!selectedDeleteRecipeId || isDeleting">
+        <button
+          class="action-button delete-button"
+          @click="deleteRecipe"
+          :disabled="!selectedDeleteRecipeId || isDeleting"
+        >
           {{ isDeleting ? 'Deleting...' : 'Delete' }}
         </button>
 
@@ -193,41 +211,41 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted } from 'vue';
-  import { useRecipeGrid } from '@/composables/useRecipeGrid';
-  import type { FoodRecipeDto } from '@/types/FoodRecipeDto';
+import { defineComponent, onMounted } from 'vue';
+import { useRecipeGrid } from '@/composables/useRecipeGrid';
+import type { FoodRecipeDto } from '@/types/FoodRecipeDto';
 
-  export default defineComponent({
-    name: 'RecipeGrid',
-    setup() {
-      const recipeGrid = useRecipeGrid();
+export default defineComponent({
+  name: 'RecipeGrid',
+  setup() {
+    const recipeGrid = useRecipeGrid();
 
-      // Initialize data on component mount
-      onMounted(() => {
-        recipeGrid.fetchRecipies();
-      });
+    // Initialize data on component mount
+    onMounted(() => {
+      recipeGrid.fetchRecipies();
+    });
 
-      // Method to delete a recipe by ID with confirmation
-      const deleteRecipeById = (id: string) => {
-        if (confirm('Are you sure you want to delete this recipe?')) {
-          recipeGrid.selectedDeleteRecipeId.value = id;
-          recipeGrid.deleteRecipe();
-        }
-      };
+    // Method to delete a recipe by ID
+    const deleteRecipeById = (id: string) => {
+      if (confirm('Are you sure you want to delete this recipe?')) {
+        recipeGrid.selectedDeleteRecipeId.value = id;
+        recipeGrid.deleteRecipe();
+      }
+    };
 
-      // Modify loadRecipeForUpdate to accept a recipe object
-      const loadRecipeForUpdate = (recipe: FoodRecipeDto) => {
-        recipeGrid.loadRecipeForUpdate(recipe);
-        recipeGrid.singleRecipe.value = recipe;
-      };
+    // Modify loadRecipeForUpdate to accept a recipe object
+    const loadRecipeForUpdate = (recipe: FoodRecipeDto) => {
+      recipeGrid.loadRecipeForUpdate();
+      recipeGrid.singleRecipe.value = recipe;
+    };
 
-      return {
-        ...recipeGrid,
-        deleteRecipeById,
-        loadRecipeForUpdate,
-      };
-    },
-  });
+    return {
+      ...recipeGrid,
+      deleteRecipeById,
+      loadRecipeForUpdate,
+    };
+  },
+});
 </script>
 
 <!-- Import the separated styles -->
