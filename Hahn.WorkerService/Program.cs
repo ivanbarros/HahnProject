@@ -1,22 +1,81 @@
+using Hahn.Data.Context;
+using Hahn.Data.Interfaces.Repositories;
+using Hahn.Data.Repositories;
 using Hahn.Infra.Configuration;
 using Hahn.Jobs;
+using Hahn.WorkerService.HangFireConfig;
 using Hangfire;
+using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((hostContext, services) =>
+    .ConfigureWebHostDefaults(webBuilder =>
     {
-        var configuration = hostContext.Configuration;
-        services.AddApplicationServices();
-        services.AddInfrastructureServices(configuration);        
-        services.AddHttpClient();
-
-        services.AddHangfire(config =>
+        webBuilder.ConfigureServices((context, services) =>
         {
-            config.UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection"));
+            var configuration = context.Configuration;
+
+            services.AddDbContext<HahnDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<IRecipeRepository, RecipeRepository>();
+            services.AddAutoMapper(typeof(MappingProfile));
+            services.AddHangfireServer();
+            services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                      .UseSimpleAssemblyNameTypeSerializer()
+                      .UseRecommendedSerializerSettings()
+                      .UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+                      {
+                          CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                          SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                          QueuePollInterval = TimeSpan.Zero,
+                          UseRecommendedIsolationLevel = true,
+                          DisableGlobalLocks = true
+                      });
+            });
+
+            services.AddHangfireServer();           
+            services.AddTransient<RecipeInsertIfNotExistsJob>();
+            services.AddTransient<RecipeUpsertJob>();
+            services.AddTransient<RecipeDeleteJob>();
+            services.AddTransient<RecipeGetAllJob>();
+            services.AddTransient<RecipeGetByIdJob>();
+            services.AddControllers();
         });
-        services.AddHangfireServer();
-        services.AddTransient<RecipeInsertIfNotExistsJob>();
-        services.AddHostedService<Worker>();
+
+        webBuilder.Configure(app =>
+        {
+            var env = app.ApplicationServices.GetRequiredService<IHostEnvironment>();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseRouting();
+
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireAuthorizationFilter() }
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHangfireDashboard();
+            });
+        });
     });
 
-await builder.RunConsoleAsync();
+var host = builder.Build();
+
+
+host.Run();

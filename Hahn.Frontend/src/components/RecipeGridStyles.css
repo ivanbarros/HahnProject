@@ -1,0 +1,90 @@
+/* src/components/RecipeGridStyles.css */
+
+.page-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-label {
+    font-weight: bold;
+}
+
+.filter-input {
+    flex: 1;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.filter-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+    .filter-button:disabled {
+        background-color: #90caf9;
+        cursor: not-allowed;
+    }
+
+.recipe-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .recipe-table th,
+    .recipe-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .recipe-table th {
+        background-color: #f2f2f2;
+    }
+
+.action-button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.view-button {
+    background-color: #2196f3;
+}
+
+.edit-button {
+    background-color: #ff9800;
+}
+
+.delete-button {
+    background-color: #f44336;
+}
+
+.loading-spinner,
+.no-recipies {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 18px;
+    color: #555;
+}

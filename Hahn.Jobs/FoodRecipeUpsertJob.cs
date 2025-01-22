@@ -1,5 +1,6 @@
 ﻿using Hahn.Data.Interfaces.ExternalServices;
 using Hahn.Data.Interfaces.Repositories;
+using Hahn.Domain.Entities;
 using Hahn.Jobs.Interfaces;
 
 namespace Hahn.Jobs;
@@ -7,9 +8,9 @@ namespace Hahn.Jobs;
 public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
 {
     private readonly IExternalFoodApiClient _externalClient;
-    private readonly IFoodRecipeRepository _recipeRepo;
+    private readonly IRecipeRepository _recipeRepo;
 
-    public FoodRecipeUpsertJob(IExternalFoodApiClient externalClient, IFoodRecipeRepository recipeRepo)
+    public FoodRecipeUpsertJob(IExternalFoodApiClient externalClient, IRecipeRepository recipeRepo)
     {
         _externalClient = externalClient;
         _recipeRepo = recipeRepo;
@@ -17,28 +18,28 @@ public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
 
     public async Task RunUpsertAsync()
     {
-        var externalRecipes = await _externalClient.GetLatestRecipesAsync();
-        if (externalRecipes == null) return;
+        var externalRecipies = await _externalClient.GetLatestRecipiesAsync();
+        if (externalRecipies == null) return;
 
-        var currentRecipes = await _recipeRepo.GetAllAsync();
-        var currentTitles = currentRecipes.Select(r => r.Title.ToLower()).ToHashSet();
+        var currentRecipies = await _recipeRepo.GetAllAsync();
+        var currentTitles = currentRecipies.Select(r => r.Title.ToLower()).ToHashSet();
 
-        foreach (var ext in externalRecipes)
+        foreach (var ext in externalRecipies)
         {
             if (string.IsNullOrWhiteSpace(ext.Title)) continue;
 
             if (currentTitles.Contains(ext.Title.ToLower()))
             {
 
-                var existing = currentRecipes.FirstOrDefault(r =>
+                var existing = currentRecipies.FirstOrDefault(r =>
                     r.Title.ToLower() == ext.Title.ToLower());
-                existing.Update(ext.Title, ext.Instructions, ext.Ingredients);
+                existing.Update(ext.Title, ext.Ingredients, ext.Instructions);
             }
             else
             {
                 // Insert new
-                var newRecipe = new Hahn.Domain.Entities.FoodRecipe(
-                    ext.Title, ext.Instructions, ext.Ingredients
+                var newRecipe = new FoodRecipies(
+                    ext.Title, ext.Ingredients, ext.Instructions
                 );
                 await _recipeRepo.AddAsync(newRecipe);
             }

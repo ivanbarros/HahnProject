@@ -23,7 +23,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public virtual async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.AsNoTracking().ToListAsync();
     }
 
     public virtual async Task AddAsync(T entity)
@@ -37,10 +37,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         await Task.CompletedTask;
     }
 
-    public virtual async Task RemoveAsync(T entity)
+    public async Task<bool> RemoveAsync(T entity)
     {
         _dbSet.Remove(entity);
-        await Task.CompletedTask;
+        return true;
     }
 
     public virtual async Task SaveChangesAsync()

@@ -1,24 +1,36 @@
-﻿using AutoMapper;
-using Hahn.Data.Dtos.Recipies;
-using Hahn.Data.Interfaces.Repositories;
+﻿using Hahn.Data.Dtos.Recipies;
+using Hahn.Jobs;
+using Hahn.Jobs.Utils;
+using Hangfire;
 using MediatR;
 
 namespace Hahn.Application.Queries.Recipies.Handlers;
 
-public class GetAllRecipesQueryHandler : IRequestHandler<GetAllRecipesQuery, IEnumerable<FoodRecipeDto>>
+public class GetAllRecipiesQueryHandler : IRequestHandler<GetAllRecipiesQuery, IEnumerable<FoodRecipeDto>>
 {
-    private readonly IFoodRecipeRepository _recipeRepo;
-    private readonly IMapper _mapper;
 
-    public GetAllRecipesQueryHandler(IFoodRecipeRepository recipeRepo, IMapper mapper)
+    private readonly ILogger<GetAllRecipiesQueryHandler> _logger;
+
+    public GetAllRecipiesQueryHandler(ILogger<GetAllRecipiesQueryHandler> logger)
     {
-        _recipeRepo = recipeRepo;
-        _mapper = mapper;
+        _logger = logger;
     }
 
-    public async Task<IEnumerable<FoodRecipeDto>> Handle(GetAllRecipesQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<FoodRecipeDto>> Handle(GetAllRecipiesQuery request, CancellationToken cancellationToken)
     {
-        var allRecipes = await _recipeRepo.GetAllAsync();
-        return _mapper.Map<IEnumerable<FoodRecipeDto>>(allRecipes);
+        _logger.LogInformation("Fetching all Recipies.");
+        var jobId = JobResultStore.RegisterJob();
+
+        // Enqueue the concrete job class
+        BackgroundJob.Enqueue<RecipeGetAllJob>(job => job.RunAsync(jobId));
+
+        var recipies = await JobResultStore.GetJobResultAsync<IEnumerable<FoodRecipeDto>>(jobId, timeoutSeconds: 30);
+        if (recipies == null)
+        {
+            throw new TimeoutException("The get all Recipies job timed out.");
+        }
+
+        _logger.LogInformation("Retrieved {Count} Recipies.", recipies.Count());
+        return recipies;
     }
 }

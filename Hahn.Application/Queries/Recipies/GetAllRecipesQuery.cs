@@ -3,6 +3,6 @@ using MediatR;
 
 namespace Hahn.Application.Queries.Recipies;
 
-public class GetAllRecipesQuery : IRequest<IEnumerable<FoodRecipeDto>>
+public class GetAllRecipiesQuery : IRequest<IEnumerable<FoodRecipeDto>>
 {
 }
