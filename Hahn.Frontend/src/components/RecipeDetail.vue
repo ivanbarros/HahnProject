@@ -18,7 +18,7 @@
               class="action-button delete-button">
         {{ isDeleting ? 'Deleting...' : 'Delete' }}
       </button>
-      <router-link to="/recipes" class="action-button back-button">
+      <router-link to="/recipies" class="action-button back-button">
         Back to List
       </router-link>
     </div>
@@ -26,7 +26,7 @@
 
   <div v-else-if="!isLoading && !error" class="not-found">
     <p>Recipe not found.</p>
-    <router-link to="/recipes" class="action-button back-button">
+    <router-link to="/recipies" class="action-button back-button">
       Back to List
     </router-link>
   </div>
@@ -42,7 +42,7 @@
 
 <script lang="ts">
   import { defineComponent, onMounted, ref } from 'vue';
-  import { useRecipes } from '@/composables/useRecipeGrid';
+  import { useRecipies } from '@/composables/useRecipeGrid';
   import { useRoute, useRouter } from 'vue-router';
   import type { FoodRecipeDto } from '@/types/FoodRecipeDto';
 
@@ -51,7 +51,7 @@
     setup() {
       const route = useRoute();
       const router = useRouter();
-      const { fetchRecipeById, deleteRecipe } = useRecipes();
+      const { fetchRecipeById, deleteRecipe } = useRecipies();
 
       const recipe = ref<FoodRecipeDto | null>(null);
       const isLoading = ref<boolean>(false);
@@ -84,7 +84,7 @@
           isDeleting.value = true;
           try {
             await deleteRecipe(id);
-            router.push('/recipes');
+            router.push('/recipies');
           } catch (err) {
             error.value = 'Failed to delete the recipe.';
           } finally {

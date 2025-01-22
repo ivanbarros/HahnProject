@@ -12,12 +12,12 @@ const routes: Array<RouteRecordRaw> = [
     component: RecipeGrid,
   },
   {
-    path: '/recipes',
+    path: '/recipies',
     name: 'RecipeGrid',
     component: RecipeGrid,
   },
   {
-    path: '/recipes/:id',
+    path: '/recipies/:id',
     name: 'RecipeDetail',
     component: RecipeDetail,
     props: true,

@@ -16,18 +16,18 @@ public class FoodRecipies : CommonEntity
 
     private FoodRecipies() { }
 
-    public FoodRecipies(string title, string instructions, string ingredients)
+    public FoodRecipies(string title, string ingredients, string instructions)
     {
         Title = title;
-        Instructions = instructions;
         Ingredients = ingredients;
+        Instructions = instructions;
     }
 
     public void Update(string title, string instructions, string ingredients)
     {
         Title = title;
-        Instructions = instructions;
         Ingredients = ingredients;
+        Instructions = instructions;
     }
 }
 

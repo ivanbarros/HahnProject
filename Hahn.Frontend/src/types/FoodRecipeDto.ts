@@ -1,11 +1,16 @@
 // src/types/FoodRecipeDto.ts
 
+export interface Ingredient {
+  ingredient: string;
+  measure: string;
+}
+
 export interface FoodRecipeDto {
-  id: string; // Assuming GUID is represented as a string
-  title: string;
-  ingredients: string;
-  instructions: string;
-  measure?: string;
-  description?: string;
+  strMeal: string;
+  strInstructions: string;
+  ingredients: Ingredient[];
+  description?: string; // Optional fields
   cuisine?: string;
+  jobId?: string | null;
+  id: string;
 }

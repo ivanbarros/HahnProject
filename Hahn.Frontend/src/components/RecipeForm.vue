@@ -67,7 +67,7 @@
       {{ successMessage }}
     </div>
 
-    <router-link to="/recipes" class="action-button back-button">
+    <router-link to="/recipies" class="action-button back-button">
       Back to List
     </router-link>
   </div>
@@ -75,7 +75,7 @@
 
 <script lang="ts">
   import { defineComponent, onMounted, ref, computed } from 'vue';
-  import { useRecipes } from '@/composables/useRecipeGrid';
+  import { useRecipies } from '@/composables/useRecipeGrid';
   import { useRoute, useRouter } from 'vue-router';
   import type { FoodRecipeDto } from '@/types/FoodRecipeDto';
 
@@ -84,7 +84,7 @@
     setup() {
       const route = useRoute();
       const router = useRouter();
-      const { fetchRecipeById, upsertRecipe } = useRecipes();
+      const { fetchRecipeById, upsertRecipe } = useRecipies();
 
       // Form Fields
       const title = ref<string>('');
@@ -164,7 +164,7 @@
               : 'Recipe created successfully.';
             // Optionally, redirect to the recipe detail or list after a delay
             setTimeout(() => {
-              router.push('/recipes');
+              router.push('/recipies');
             }, 1500);
           }
         } catch (err) {

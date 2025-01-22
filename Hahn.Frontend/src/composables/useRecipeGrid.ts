@@ -1,67 +1,91 @@
 import { ref, computed } from 'vue';
-import api from '../services/api';
 import type { FoodRecipeDto } from '../types/FoodRecipeDto';
 import { useToast } from 'vue-toastification';
+import axiosInstance from '@/services/axiosInstance';
 
-export function useRecipes() {
+export function useRecipies() {
   // State Variables
-  const recipes = ref<FoodRecipeDto[]>([]);
+  const recipies = ref<FoodRecipeDto[]>([]);
   const filterTerm = ref<string>('');
   const isLoading = ref<boolean>(false);
-  const isUpserting = ref<boolean>(false);
   const isDeleting = ref<boolean>(false);
+  const error = ref<string | null>(null);
 
   const toast = useToast();
 
   // Computed Properties
-  const filteredRecipes = computed(() => {
+  const filteredRecipies = computed(() => {
     if (!filterTerm.value) {
-      return recipes.value;
+      return recipies.value;
     }
-    return recipes.value.filter((recipe) =>
-      recipe.title.toLowerCase().includes(filterTerm.value.toLowerCase())
+    return recipies.value.filter(recipe =>
+      recipe.strMeal.toLowerCase().includes(filterTerm.value.toLowerCase())
     );
   });
 
-  // Fetch All Recipes
-  const fetchRecipes = async () => {
+  // Function to Map Ingredients (if necessary)
+  const mapIngredients = (item: any) => {
+    const ingredients = [];
+    for (let i = 1; i <= 20; i++) { // Assuming a maximum of 20 ingredients
+      const ingredient = item[`strIngredient${i}`];
+      const measure = item[`strMeasure${i}`];
+      if (ingredient && ingredient.trim() !== "") {
+        ingredients.push({ ingredient, measure });
+      }
+    }
+    return ingredients;
+  };
+
+
+  const fetchRecipies = async () => {
     isLoading.value = true;
+    error.value = null;
     try {
-      const response = await api.get<FoodRecipeDto[]>('/Recipies');
-      recipes.value = response.data;
-      console.log('Fetched Recipes:', recipes.value); // Debugging Line
-    } catch (error: any) {
-      console.error('Error fetching recipes:', error);
-      toast.error('Failed to fetch recipes.');
+      console.log('Fetching recipies from /api/Recipies...');
+      const response = await axiosInstance.get<FoodRecipeDto[]>('Recipies');
+
+      console.log('Data from Ivan API:', response.data);
+
+      recipies.value = response.data;
+    } catch (err: any) {
+      console.error('Error fetching recipies:', err);
+      toast.error('Failed to fetch recipies.');
+      error.value = 'Unable to load recipies. Please try again later.';
     } finally {
       isLoading.value = false;
+      console.log('Loading completed.');
     }
   };
 
-  // Delete Recipe
+  // Delete Recipe using Axios
   const deleteRecipe = async (id: string) => {
     isDeleting.value = true;
     try {
-      await api.delete(`/Recipies/delete/${id}`);
-      // Remove from local list
-      recipes.value = recipes.value.filter((recipe) => recipe.id !== id);
+      console.log(`Deleting recipe with ID: ${id}`);
+      const response = await axiosInstance.delete(`Recipies/delete/${id}`);
+
+      console.log('Recipe deleted successfully.', response.data);
+
+      // Remove the deleted recipe from the local list
+      recipies.value = recipies.value.filter(recipe => recipe.id !== id);
       toast.success('Recipe deleted successfully.');
-    } catch (error: any) {
-      console.error('Error deleting recipe:', error);
+    } catch (err: any) {
+      console.error('Error deleting recipe:', err);
       toast.error('Failed to delete the recipe.');
     } finally {
       isDeleting.value = false;
+      console.log('Deletion process completed.');
     }
   };
 
   return {
-    recipes,
+    recipies,
     filterTerm,
     isLoading,
-    isUpserting,
     isDeleting,
-    filteredRecipes,
-    fetchRecipes,
+    filteredRecipies,
+    fetchRecipies,
     deleteRecipe,
+    error,
   };
 }

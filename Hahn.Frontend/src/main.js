@@ -5,7 +5,7 @@ import App from './App.vue';
 import router from './router';
 import Toast, { POSITION } from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
-import './styles/global.css'; // Ensure this path is correct and the file exists
+import './styles/global.css';
 
 const app = createApp(App);
 

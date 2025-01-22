@@ -2,7 +2,7 @@
 
 <template>
   <nav class="navbar">
-    <router-link to="/recipes" class="nav-link">Home</router-link>
+    <router-link to="/recipies" class="nav-link">Home</router-link>
     <router-link to="/upsert" class="nav-link">Create Recipe</router-link>
   </nav>
 </template>
