@@ -193,15 +193,14 @@ PostgreSQL: Download Here (if using the database)
 Docker (Optional): Download Here for containerization.
 Git: Download Here for version control.
 Backend Setup
-Clone the Repository
+Clone the Repository<br/>
 
+git clone https://github.com/ivanbarros/HahnProject.git<br/>
+cd HahnProject<br/>
+Navigate to the Backend Directory<br/>
 
-git clone https://github.com/your-username/HahnProject.git
-cd HahnProject
-Navigate to the Backend Directory
-
-cd src/Hahn.WebAPI
-Restore Dependencies and Build the Project
+cd src/Hahn.WebAPI<br/>
+Restore Dependencies and Build the Project<br/>
 
 dotnet restore
 dotnet build
@@ -215,7 +214,7 @@ Configure Connection Strings:
     "DefaultConnection": "Host=localhost;Database=HahnDb;Username=your-username;Password=your-password"
   },
   ...
-}
+}<br/><br/>
 Run the Backend API
 
 dotnet run
@@ -229,8 +228,8 @@ Install Dependencies
 
 Using Yarn:
 
-yarn install
-Or using npm:
+yarn install<br/>
+Or using npm:<br/>
 
 npm install
 Configure Environment Variables
@@ -240,8 +239,8 @@ Start the Frontend Development Server
 
 Using Yarn:
 
-yarn dev
-Or using npm:
+yarn dev<br/>
+Or using npm:<br/>
 
 npm run dev
 The frontend application will be accessible.
