@@ -18,4 +18,7 @@ public class FoodRecipeDto : CommonEntity
     public string Description { get; set; }
     public string Cuisine { get; set; }
     public string JobId { get; set; }
+
+    [JsonPropertyName("imgUrl")]
+    public string ImgUrl { get; set; }
 }

@@ -1,10 +1,7 @@
-﻿using Hahn.Data.Dtos.Recipies;
-using Hahn.Data.Interfaces.Repositories;
+﻿using Hahn.Data.Interfaces.Repositories;
 using Hahn.Domain.Entities;
 using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Hahn.Jobs
 {
@@ -22,7 +19,7 @@ namespace Hahn.Jobs
             _logger = logger;
         }
 
-        public async Task RunAsync(string title, string ingredients, string instructions, string jobId)
+        public async Task RunAsync(string title, string ingredients, string instructions, string ImgUrl, string jobId)
         {
             _logger.LogInformation("Attempting to upsert recipe: {Title}", title);
 
@@ -38,7 +35,7 @@ namespace Hahn.Jobs
             }
 
             // Insert new recipe
-            var newRecipe = new FoodRecipies(title, ingredients, instructions);
+            var newRecipe = new FoodRecipies(title, ingredients, instructions, ImgUrl);
             await _recipeRepository.AddAsync(newRecipe);
             await _recipeRepository.SaveChangesAsync();
 

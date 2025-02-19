@@ -20,7 +20,7 @@ namespace Hahn.Jobs
             _logger = logger;
         }
 
-        public async Task RunAsync(Guid? id, string title, string ingredients, string instructions, string jobId)
+        public async Task RunAsync(Guid? id, string title, string ingredients, string instructions,string ImgUrl, string jobId)
         {
             _logger.LogInformation("Attempting to upsert recipe: {Title}", title);
 
@@ -35,6 +35,7 @@ namespace Hahn.Jobs
                     existingRecipe.Title = title;
                     existingRecipe.Ingredients = ingredients;
                     existingRecipe.Instructions = instructions;
+                    existingRecipe.ImgUrl = ImgUrl;
                     await _recipeRepository.UpdateAsync(existingRecipe);
                     await _recipeRepository.SaveChangesAsync();
 
@@ -44,7 +45,7 @@ namespace Hahn.Jobs
                 else
                 {
                     // If recipe doesn't exist, create a new one
-                    var newRecipe = new FoodRecipies(title, ingredients, instructions);
+                    var newRecipe = new FoodRecipies(title, ingredients, instructions, ImgUrl);
                     await _recipeRepository.AddAsync(newRecipe);
                     await _recipeRepository.SaveChangesAsync();
 
@@ -55,7 +56,7 @@ namespace Hahn.Jobs
             else
             {
                 // Create new recipe
-                var newRecipe = new FoodRecipies(title, ingredients, instructions);
+                var newRecipe = new FoodRecipies(title, ingredients, instructions, ImgUrl);
                 await _recipeRepository.AddAsync(newRecipe);
                 await _recipeRepository.SaveChangesAsync();
 

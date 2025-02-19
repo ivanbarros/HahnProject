@@ -1,5 +1,6 @@
 ﻿using Hahn.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace Hahn.Data.Context;
 
@@ -14,5 +15,5 @@ public class HahnDbContext : DbContext
     {
         modelBuilder.Entity<FoodRecipies>()
             .ToTable("FoodRecipies");
-    }
+    }  
 }

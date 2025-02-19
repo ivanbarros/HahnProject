@@ -1,8 +1,6 @@
-﻿// Repositories/GenericRepository.cs
-using Hahn.Data.Context;
+﻿using Hahn.Data.Context;
 using Hahn.Data.Interfaces.Repositories.BaseRepository;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Hahn.Data.Repositories.BaseRepository;
 

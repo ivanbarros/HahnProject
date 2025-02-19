@@ -21,6 +21,7 @@ namespace Hahn.Application.Commands.Recipies.Handlers
                     request.Dto.Title,
                     request.Dto.Ingredients,
                     request.Dto.Instructions,
+                    request.Dto.ImgUrl,
                     jobId));
                        
             var recipe = await JobResultStore.GetJobResultAsync<FoodRecipeDto>(jobId, timeoutSeconds: 30);

@@ -33,13 +33,13 @@ public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
 
                 var existing = currentRecipies.FirstOrDefault(r =>
                     r.Title.ToLower() == ext.Title.ToLower());
-                existing.Update(ext.Title, ext.Ingredients, ext.Instructions);
+                existing.Update(ext.Title, ext.Ingredients, ext.Instructions,ext.ImgUrl);
             }
             else
             {
                 // Insert new
                 var newRecipe = new FoodRecipies(
-                    ext.Title, ext.Ingredients, ext.Instructions
+                    ext.Title, ext.Ingredients, ext.Instructions,ext.ImgUrl
                 );
                 await _recipeRepo.AddAsync(newRecipe);
             }
