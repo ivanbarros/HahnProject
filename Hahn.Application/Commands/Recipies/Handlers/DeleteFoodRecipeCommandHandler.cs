@@ -3,7 +3,7 @@ using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
 using Hahn.Data.Interfaces.Repositories.BaseRepository;
 using Hahn.Domain.Entities;
-using Hahn.Jobs;
+using Hahn.Jobs.Recipes;
 using Hahn.Jobs.Utils;
 using Hangfire;
 using MediatR;

@@ -1,9 +1,10 @@
-﻿using Hahn.Data.Interfaces.Repositories;
+﻿using Hahn.Data.Dtos.Recipies;
+using Hahn.Data.Interfaces.Repositories;
 using Hahn.Domain.Entities;
 using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace Hahn.Jobs
+namespace Hahn.Jobs.Recipes
 {
     /// <summary>
     /// Hangfire job that inserts a recipe if it does not already exist.
@@ -29,7 +30,7 @@ namespace Hahn.Jobs
             {
                 _logger.LogInformation("Recipe '{Title}' already exists. Skipping insert.", title);
                 // Return the existing recipe
-                var existingRecipe = _recipeRepository.MapToDto(existingRecipies.First());
+                var existingRecipe = _recipeRepository.MapToDto<FoodRecipeDto>(existingRecipies.First());
                 JobResultStore.SetJobResult(jobId, existingRecipe);
                 return;
             }
@@ -42,7 +43,7 @@ namespace Hahn.Jobs
             _logger.LogInformation("Recipe '{Title}' inserted successfully.", title);
 
             // Map to DTO
-            var recipeDto = _recipeRepository.MapToDto(newRecipe);
+            var recipeDto = _recipeRepository.MapToDto<FoodRecipeDto>(newRecipe);
 
             // Return the new recipe
             JobResultStore.SetJobResult(jobId, recipeDto);

@@ -1,4 +1,5 @@
-﻿using Hahn.Data.Context;
+﻿using AutoMapper;
+using Hahn.Data.Context;
 using Hahn.Data.Interfaces.Repositories.BaseRepository;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,12 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     protected readonly HahnDbContext _context;
     protected readonly DbSet<T> _dbSet;
-
-    public GenericRepository(HahnDbContext context)
+    private readonly IMapper _mapper;
+    public GenericRepository(HahnDbContext context,IMapper mapper)
     {
         _context = context;
         _dbSet = _context.Set<T>();
+        _mapper = mapper;
     }
     public virtual async Task<T> GetByIdAsync(Guid id)
     {
@@ -45,5 +47,25 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         await _context.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<T>> SearchByTitleAsync(string title)
+    {
+        return await _dbSet
+            .Where(x => EF.Property<string>(x, "Title").Contains(title))
+            .ToListAsync();
+    }
+
+    public TDto MapToDto<TDto>(T entity) where TDto : class
+    {
+        return _mapper.Map<TDto>(entity);
+    }
+
+    public IEnumerable<TDto> MapToDtos<TDto, TEntity>(IEnumerable<TEntity> entities)
+        where TDto : class
+        where TEntity : class
+    {
+        return entities.Select(entity => _mapper.Map<TDto>(entity));
+    }
 }
+
 

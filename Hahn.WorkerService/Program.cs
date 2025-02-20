@@ -2,7 +2,7 @@ using Hahn.Data.Context;
 using Hahn.Data.Interfaces.Repositories;
 using Hahn.Data.Repositories;
 using Hahn.Infra.Configuration;
-using Hahn.Jobs;
+using Hahn.Jobs.Recipes;
 using Hahn.WorkerService.HangFireConfig;
 using Hangfire;
 using Hangfire.SqlServer;

@@ -3,9 +3,9 @@ using Hahn.Data.Interfaces.Repositories;
 using Hahn.Domain.Entities;
 using Hahn.Jobs.Interfaces;
 
-namespace Hahn.Jobs;
+namespace Hahn.Jobs.Recipes;
 
-public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
+public class FoodRecipeUpsertJob : IUpsertJob
 {
     private readonly IExternalFoodApiClient _externalClient;
     private readonly IRecipeRepository _recipeRepo;
@@ -33,13 +33,13 @@ public class FoodRecipeUpsertJob : IFoodRecipeUpsertJob
 
                 var existing = currentRecipies.FirstOrDefault(r =>
                     r.Title.ToLower() == ext.Title.ToLower());
-                existing.Update(ext.Title, ext.Ingredients, ext.Instructions,ext.ImgUrl);
+                existing.Update(ext.Title, ext.Ingredients, ext.Instructions, ext.ImgUrl);
             }
             else
             {
                 // Insert new
                 var newRecipe = new FoodRecipies(
-                    ext.Title, ext.Ingredients, ext.Instructions,ext.ImgUrl
+                    ext.Title, ext.Ingredients, ext.Instructions, ext.ImgUrl
                 );
                 await _recipeRepo.AddAsync(newRecipe);
             }

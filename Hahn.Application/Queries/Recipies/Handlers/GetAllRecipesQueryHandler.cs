@@ -1,5 +1,5 @@
 ﻿using Hahn.Data.Dtos.Recipies;
-using Hahn.Jobs;
+using Hahn.Jobs.Recipes;
 using Hahn.Jobs.Utils;
 using Hangfire;
 using MediatR;
