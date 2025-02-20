@@ -1,8 +1,8 @@
 ﻿using Hahn.Domain.Entities.BaseEntity;
 
-namespace Hahn.Data.Dtos.Events;
+namespace Hahn.Domain.Entities;
 
-public class EventsDto : CommonEntity
+public class Events : CommonEntity
 {
     public string Local { get; set; }
     public string DataEvento { get; set; }

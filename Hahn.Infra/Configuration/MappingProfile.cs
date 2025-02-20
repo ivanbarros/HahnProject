@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hahn.Data.Dtos.Events;
 using Hahn.Data.Dtos.Recipies;
 using Hahn.Domain.Entities;
 
@@ -10,7 +11,12 @@ public class MappingProfile : Profile
     {
         CreateMap<FoodRecipies, FoodRecipeDto>();
 
+        CreateMap<Events,EventsDto>();
+
         CreateMap<UpsertFoodRecipeDto, FoodRecipies>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
+        
+        CreateMap<UpsertEventDto, Events>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
     }
 }

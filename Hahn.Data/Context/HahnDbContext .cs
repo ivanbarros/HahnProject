@@ -1,6 +1,5 @@
 ﻿using Hahn.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 
 namespace Hahn.Data.Context;
 
@@ -10,10 +9,14 @@ public class HahnDbContext : DbContext
         : base(options) { }
 
     public DbSet<FoodRecipies> FoodRecipies { get; set; }
+    public DbSet<Events> Events { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<FoodRecipies>()
             .ToTable("FoodRecipies");
-    }  
+
+        modelBuilder.Entity<Events>()
+            .ToTable("Events");
+    }
 }
