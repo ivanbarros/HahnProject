@@ -1,10 +1,10 @@
-﻿
-using Hahn.Data.Dtos.Recipies;
+﻿using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
+using Hahn.Domain.Entities;
 using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace Hahn.Jobs;
+namespace Hahn.Jobs.Recipes;
 
 /// <summary>
 /// Hangfire job that retrieves all Recipies.
@@ -27,16 +27,16 @@ public class RecipeGetAllJob
         try
         {
             var Recipies = await _recipeRepository.GetAllAsync();
-            var recipeDtos = _recipeRepository.MapToDtos(Recipies);
+            var recipeDtos = _recipeRepository.MapToDtos<FoodRecipeDto, FoodRecipies>(Recipies);
 
             _logger.LogInformation("Job {JobId}: Retrieved {Count} Recipies.", jobId, recipeDtos.Count());
 
             // Explicitly specify the type parameter
-            JobResultStore.SetJobResult<IEnumerable<FoodRecipeDto>>(jobId, recipeDtos);
+            JobResultStore.SetJobResult(jobId, recipeDtos);
 
             _logger.LogInformation("Job {JobId}: Result set successfully.", jobId);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Job {JobId}: An error occurred while fetching Recipies.", jobId);
             // Optionally, set a default or error result

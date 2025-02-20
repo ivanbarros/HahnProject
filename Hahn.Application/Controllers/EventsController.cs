@@ -1,4 +1,5 @@
-﻿using Hahn.Data.Dtos.Events;
+﻿using Hahn.Application.Queries.Events;
+using Hahn.Data.Dtos.Events;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,8 @@ public class EventsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error.")]
     public async Task<IActionResult> GetAll()
     {
+        var query = new GetAllEventsQuery();
+        var result = _mediator.Send(query);
         return Ok();
     }
 

@@ -2,9 +2,9 @@
 using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace Hahn.Jobs
+namespace Hahn.Jobs.Recipes
 {
-    
+
     public class RecipeDeleteJob
     {
         private readonly IRecipeRepository _recipeRepository;

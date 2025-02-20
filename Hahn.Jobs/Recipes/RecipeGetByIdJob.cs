@@ -1,8 +1,9 @@
 ﻿using Hahn.Jobs.Utils;
 using Hahn.Data.Interfaces.Repositories;
 using Microsoft.Extensions.Logging;
+using Hahn.Data.Dtos.Recipies;
 
-namespace Hahn.Jobs
+namespace Hahn.Jobs.Recipes
 {
     /// <summary>
     /// Hangfire job that retrieves a recipe by ID.
@@ -23,7 +24,7 @@ namespace Hahn.Jobs
             _logger.LogInformation("Fetching recipe with ID: {Id}", id);
 
             var recipe = await _recipeRepository.GetByIdAsync(id);
-            var recipeDto = recipe != null ? _recipeRepository.MapToDto(recipe) : null;
+            var recipeDto = recipe != null ? _recipeRepository.MapToDto<FoodRecipeDto>(recipe) : null;
 
             if (recipeDto != null)
             {

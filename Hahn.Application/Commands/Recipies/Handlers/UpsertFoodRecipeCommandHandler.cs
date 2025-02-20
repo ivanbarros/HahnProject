@@ -2,9 +2,9 @@
 using Hahn.Jobs.Utils;
 using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
-using Hahn.Jobs;
 using Hangfire;
 using MediatR;
+using Hahn.Jobs.Recipes;
 
 namespace Hahn.Application.Commands.Recipies.Handlers
 {
