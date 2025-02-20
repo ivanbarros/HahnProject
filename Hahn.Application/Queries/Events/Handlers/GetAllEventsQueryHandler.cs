@@ -1,5 +1,4 @@
 ﻿using Hahn.Data.Dtos.Events;
-using Hahn.Data.Dtos.Recipies;
 using Hahn.Jobs.Events;
 using Hahn.Jobs.Utils;
 using Hangfire;
