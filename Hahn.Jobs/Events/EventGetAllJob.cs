@@ -10,25 +10,32 @@ public class EventGetAllJob
 {
     private readonly ILogger<EventGetAllJob> _logger;
     private readonly IEventsRepository _eventRepository;
+
+    public EventGetAllJob(ILogger<EventGetAllJob> logger, IEventsRepository eventRepository)
+    {
+        _logger = logger;
+        _eventRepository = eventRepository;
+    }
+
     public async Task RunAsync(string jobId)
     {
-        _logger.LogInformation("Job {JobId}: Fetching all Recipies.", jobId);
+        _logger.LogInformation("Job {JobId}: Fetching all Events.", jobId);
 
         try
         {
             var events = await _eventRepository.GetAllAsync();
-            var recipeDtos = _eventRepository.MapToDtos<EventsDto, Domain.Entities.Events>(events);
+            var eventsDto = _eventRepository.MapToDtos<EventsDto, Domain.Entities.Events>(events);
 
-            _logger.LogInformation("Job {JobId}: Retrieved {Count} Recipies.", jobId, recipeDtos.Count());
+            _logger.LogInformation("Job {JobId}: Retrieved {Count} Events.", jobId, eventsDto.Count());
 
             // Explicitly specify the type parameter
-            JobResultStore.SetJobResult(jobId, recipeDtos);
+            JobResultStore.SetJobResult(jobId, eventsDto);
 
             _logger.LogInformation("Job {JobId}: Result set successfully.", jobId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Job {JobId}: An error occurred while fetching Recipies.", jobId);
+            _logger.LogError(ex, "Job {JobId}: An error occurred while fetching events.", jobId);
             // Optionally, set a default or error result
             JobResultStore.SetJobResult<IEnumerable<EventsDto>>(jobId, null);
         }

@@ -31,7 +31,7 @@ public class EventsController : ControllerBase
     {
         var query = new GetAllEventsQuery();
         var result = _mediator.Send(query);
-        return Ok();
+        return Ok(result);
     }
 
 }

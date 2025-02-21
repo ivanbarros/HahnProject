@@ -21,10 +21,10 @@ public class GetAllEventsQueryHandler : IRequestHandler<GetAllEventsQuery, IEnum
         var events = await JobResultStore.GetJobResultAsync<IEnumerable<EventsDto>>(jobId, timeoutSeconds: 30);
         if (events == null)
         {
-            throw new TimeoutException("The get all Recipies job timed out.");
+            throw new TimeoutException("The get all events job timed out.");
         }
 
-        _logger.LogInformation("Retrieved {Count} Recipies.", events.Count());
+        _logger.LogInformation("Retrieved {Count} events.", events.Count());
         return events;
 
 
