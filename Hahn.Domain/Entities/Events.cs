@@ -4,10 +4,9 @@ namespace Hahn.Domain.Entities;
 
 public class Events : CommonEntity
 {
-    public string Local { get; set; }
-    public string DataEvento { get; set; }
-    public string Tema { get; set; }
-    public int QtdPessoas { get; set; }
-    public string Lote { get; set; }
+    public string Location { get; set; }
+    public DateTime DateEvent { get; set; }
+    public string Ttile { get; set; }
+    public int QntPeople { get; set; }
     public string ImagemUrl { get; set; }
 }
