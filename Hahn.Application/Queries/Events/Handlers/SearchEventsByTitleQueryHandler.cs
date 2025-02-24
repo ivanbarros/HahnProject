@@ -2,6 +2,7 @@
 using Hahn.Data.Dtos.Events;
 using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
+using Hahn.Data.Repositories;
 using Hahn.Jobs.Events;
 using Hahn.Jobs.Recipes;
 using Hahn.Jobs.Utils;
@@ -26,18 +27,16 @@ public class SearchEventsByTitleQueryHandler : IRequestHandler<SearchEventsByTit
     public async Task<IEnumerable<EventsDto>> Handle(SearchEventsByTitleQuery request, CancellationToken cancellationToken)
     {
         var jobId = JobResultStore.RegisterJob();
-
-        // Enqueue the background job, passing the jobId
+        
         BackgroundJob.Enqueue<EventsGetByTitleJob>(
             job => job.RunAsync(
                 request.Title,
                 jobId));
 
-        // Await the job result
         var events = await JobResultStore.GetJobResultAsync<IEnumerable<EventsDto>>(jobId, timeoutSeconds: 30);
         if (events == null)
         {
-            throw new KeyNotFoundException($"Event with ID {request.Title} not found or job timed out.");
+            throw new KeyNotFoundException($"Event with TITLE {request.Title} not found or job timed out.");
         }
 
         return events;
