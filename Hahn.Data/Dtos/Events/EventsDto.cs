@@ -6,7 +6,7 @@ public class EventsDto : CommonEntity
 {
     public string Location { get; set; }
     public string EventDate { get; set; }
-    public string Ttile { get; set; }
+    public string Title { get; set; }
     public int QtyPeople { get; set; }
     public string ImagemUrl { get; set; }
 }

@@ -8,12 +8,16 @@ public class HahnDbContext : DbContext
     public HahnDbContext(DbContextOptions<HahnDbContext> options)
         : base(options) { }
 
-    public DbSet<FoodRecipies> FoodRecipies { get; set; }    
+    public DbSet<FoodRecipies> FoodRecipies { get; set; }
+    
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<FoodRecipies>()
             .ToTable("FoodRecipies");
+        
+        modelBuilder.Entity<Events>()
+            .ToTable("Events");
     }
 }
