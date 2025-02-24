@@ -56,13 +56,13 @@ public class EventsController : ControllerBase
     [HttpPost("upsert")]
     [SwaggerOperation(Summary = "Creates or updates a event.")]
     [SwaggerResponse(StatusCodes.Status200OK, "The created or updated event.", typeof(EventsDto))]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid recipe data.")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid events data.")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal server error.")]
     public async Task<ActionResult<EventsDto>> Upsert([FromBody] UpsertEventDto dto)
     {
         var command = new UpsertEventCommand(dto);
-        var recipe = await _mediator.Send(command);
-        return Ok(recipe);
+        var events = await _mediator.Send(command);
+        return Ok(events);
     }
 
 
