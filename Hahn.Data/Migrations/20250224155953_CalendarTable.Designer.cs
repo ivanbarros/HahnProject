@@ -4,6 +4,7 @@ using Hahn.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hahn.Data.Migrations
 {
     [DbContext(typeof(HahnDbContext))]
-    partial class HahnDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250224155953_CalendarTable")]
+    partial class CalendarTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace Hahn.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Calendar", (string)null);
+                    b.ToTable("Calendar");
                 });
 
             modelBuilder.Entity("Hahn.Domain.Entities.FoodRecipies", b =>

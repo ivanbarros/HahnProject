@@ -4,6 +4,7 @@ using Hahn.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hahn.Data.Migrations
 {
     [DbContext(typeof(HahnDbContext))]
-    partial class HahnDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250224154610_Fixit")]
+    partial class Fixit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,33 +25,38 @@ namespace Hahn.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Hahn.Domain.Entities.Calendar", b =>
+            modelBuilder.Entity("Hahn.Domain.Entities.Events", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DateEvent")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("DataEvento")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImagemUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Location")
+                    b.Property<string>("Local")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("QntPeople")
+                    b.Property<string>("Lote")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("QtdPessoas")
                         .HasColumnType("int");
 
-                    b.Property<string>("Ttile")
+                    b.Property<string>("Tema")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Calendar", (string)null);
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("Hahn.Domain.Entities.FoodRecipies", b =>
