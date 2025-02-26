@@ -24,7 +24,7 @@ public class JobResultStore
     /// <summary>
     /// Awaits the result of a job with the specified JobId.
     /// </summary>
-    public static async Task<T> GetJobResultAsync<T>(string jobId, int timeoutSeconds = 30)
+    public static async Task<T?> GetJobResultAsync<T>(string jobId, int timeoutSeconds = 30)
     {
         if (_store.TryGetValue(jobId, out var tcsObj))
         {
@@ -38,7 +38,7 @@ public class JobResultStore
             }
         }
 
-        return default(T);
+        return default;
     }
 
     /// <summary>

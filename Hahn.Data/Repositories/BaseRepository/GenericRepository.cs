@@ -20,46 +20,38 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         return await _dbSet.FindAsync(id);
     }
-
     public virtual async Task<IEnumerable<T>> GetAllAsync()
     {
         return await _dbSet.AsNoTracking().ToListAsync();
     }
-
-    public virtual async Task AddAsync(T entity)
-    {
-        await _dbSet.AddAsync(entity);
-    }
-
-    public virtual async Task UpdateAsync(T entity)
-    {
-        _dbSet.Update(entity);
-        await Task.CompletedTask;
-    }
-
-    public async Task<bool> RemoveAsync(T entity)
-    {
-        _dbSet.Remove(entity);
-        return true;
-    }
-
-    public virtual async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
-
     public async Task<IEnumerable<T>> SearchByTitleAsync(string title)
     {
         return await _dbSet
             .Where(x => EF.Property<string>(x, "Title").Contains(title))
             .ToListAsync();
     }
-
+    public virtual async Task AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+    }
+    public virtual async Task UpdateAsync(T entity)
+    {
+        _dbSet.Update(entity);
+        await Task.CompletedTask;
+    }
+    public Task<bool> RemoveAsync(T entity)
+    {
+        _dbSet.Remove(entity);
+        return Task.FromResult(true);
+    }
+    public virtual async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
     public TDto MapToDto<TDto>(T entity) where TDto : class
     {
         return _mapper.Map<TDto>(entity);
     }
-
     public IEnumerable<TDto> MapToDtos<TDto, TEntity>(IEnumerable<TEntity> entities)
         where TDto : class
         where TEntity : class

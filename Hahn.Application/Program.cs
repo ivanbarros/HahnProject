@@ -26,11 +26,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowSpecific", builder =>
     {
-        builder.AllowAnyOrigin()
+        builder.WithOrigins(["http://localhost:49799", "http://localhost:4200"])
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 });
 
@@ -44,7 +45,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 app.UseHangfireDashboard("/hangfire");
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecific");
 
 
 // 4. Configure middleware

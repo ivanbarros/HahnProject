@@ -1,5 +1,4 @@
 ﻿using Hahn.Data.Dtos.Events;
-using Hahn.Data.Dtos.Recipies;
 using Hahn.Data.Interfaces.Repositories;
 using Hahn.Jobs.Utils;
 using Microsoft.Extensions.Logging;
@@ -27,8 +26,7 @@ public class EventGetAllJob
             var eventsDto = _eventRepository.MapToDtos<EventsDto, Domain.Entities.Events>(events);
 
             _logger.LogInformation("Job {JobId}: Retrieved {Count} Events.", jobId, eventsDto.Count());
-
-            // Explicitly specify the type parameter
+            
             JobResultStore.SetJobResult(jobId, eventsDto);
 
             _logger.LogInformation("Job {JobId}: Result set successfully.", jobId);
@@ -36,7 +34,7 @@ public class EventGetAllJob
         catch (Exception ex)
         {
             _logger.LogError(ex, "Job {JobId}: An error occurred while fetching events.", jobId);
-            // Optionally, set a default or error result
+
             JobResultStore.SetJobResult<IEnumerable<EventsDto>>(jobId, null);
         }
     }
